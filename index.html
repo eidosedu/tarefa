@@ -7,15 +7,16 @@
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0f172a">
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Integração direta e automática com o database.js na mesma pasta -->
+  <script src="database.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap');
 
-    /* Fonte Cursiva Local (Basta deixar o arquivo na mesma pasta do index.html) */
     @font-face {
       font-family: 'MamaeQueNosFaz';
       src: url('MamaeQueNosFaz.ttf') format('truetype'),
            url('mamaequenosfaz.ttf') format('truetype'),
-           url('Mamae_Que_Nos_Faz.ttf') format('truetype');
+           url('assets/fonts/MamaeQueNosFaz.ttf') format('truetype');
       font-weight: normal;
       font-style: normal;
     }
@@ -42,7 +43,6 @@
       outline: none;
     }
 
-    /* Placeholder aparece SOMENTE no modo de edição. Na visão aluno ou impressão, some 100% */
     .edit-mode [contenteditable="true"]:empty:before {
       content: attr(data-placeholder);
       color: #94a3b8;
@@ -55,17 +55,15 @@
       border-radius: 3px;
     }
 
-    /* Oculta elementos opcionais vazios na Visão Aluno/Professor e na Impressão */
     body:not(.edit-mode) .hide-when-empty:empty {
       display: none !important;
     }
 
-    /* Scrollbars limpas */
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: #f1f5f9; }
     ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 3px; }
 
-    /* Estilos da Faixa Ribbon (Estilo Office) */
+    /* Ribbon Styles */
     .ribbon-tab {
       padding: 6px 12px;
       font-size: 11.5px;
@@ -154,7 +152,7 @@
     .ribbon-btn-sm:hover { background: #f1f5f9; }
     .ribbon-btn-sm.active { background: #dbeafe; color: #1d4ed8; }
 
-    /* Folha A4 Retrato (210mm x 297mm) com Empilhamento Natural */
+    /* Folha A4 Retrato */
     .a4-page {
       width: 210mm;
       height: 297mm;
@@ -171,7 +169,6 @@
       break-after: page;
     }
 
-    /* IMPORTANTE: flex-grow: 0 impede o bug de achar que a folha já tem 965px na 1ª questão! */
     .a4-content {
       display: flex;
       flex-direction: column;
@@ -233,7 +230,7 @@
       background-color: rgba(239, 246, 255, 0.12);
     }
 
-    /* Pauta de Caligrafia com SVG embutido e suporte a Cursiva/Bastão */
+    /* Pauta de Caligrafia */
     .caligraphy-row {
       height: 36px;
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='36'%3E%3Cline x1='0' y1='1' x2='100' y2='1' stroke='%2364748b' stroke-width='1'/%3E%3Crect x='0' y='11' width='100' height='14' fill='%23f1f5f9'/%3E%3Cline x1='0' y1='11' x2='100' y2='11' stroke='%2394a3b8' stroke-dasharray='3,3' stroke-width='1'/%3E%3Cline x1='0' y1='25' x2='100' y2='25' stroke='%2394a3b8' stroke-dasharray='3,3' stroke-width='1'/%3E%3Cline x1='0' y1='35' x2='100' y2='35' stroke='%2364748b' stroke-width='1'/%3E%3C/svg%3E");
@@ -249,7 +246,13 @@
       font-family: 'MamaeQueNosFaz', cursive;
       font-size: 26px;
       line-height: 36px;
-      color: #64748b;
+      color: #334155;
+    }
+
+    .font-cursiva- inline {
+      font-family: 'MamaeQueNosFaz', cursive;
+      font-size: 24px;
+      line-height: 1.1;
     }
 
     .font-bastao {
@@ -259,7 +262,7 @@
       letter-spacing: 0.18em;
       font-size: 16px;
       line-height: 36px;
-      color: #64748b;
+      color: #334155;
     }
 
     .photocopy-filter {
@@ -270,7 +273,7 @@
       font-family: 'JetBrains Mono', monospace;
     }
 
-    /* Mini caixa de upload de imagem em sub-itens (Relacionar, Linha do Tempo, Alfabetização) */
+    /* Mini caixa de imagem interativa */
     .mini-img-slot {
       position: relative;
       display: inline-flex;
@@ -295,7 +298,19 @@
       display: none !important;
     }
 
-    /* Impressão A4 Retrato Limpa */
+    /* Moldura Silábica Azul (Apoio Intrassilábico) */
+    .syl-box-chip {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1.8px solid #2563eb;
+      border-radius: 5px;
+      padding: 0px 4px;
+      margin: 0 1.5px;
+      background: #ffffff;
+      line-height: 1.15;
+    }
+
     @media print {
       @page {
         size: A4 portrait;
@@ -307,7 +322,7 @@
         height: auto !important;
         width: auto !important;
       }
-      #homeView, #ribbonHeader, .no-print, [contenteditable="true"]:empty:before, .hide-when-empty:empty, .mini-img-slot.empty {
+      #homeView, #ribbonHeader, #mediaPickerBackdrop, #systemDialogBackdrop, .no-print, [contenteditable="true"]:empty:before, .hide-when-empty:empty, .mini-img-slot.empty {
         display: none !important;
       }
       #editorView {
@@ -359,7 +374,7 @@
         </div>
         <div>
           <h1 class="text-base font-bold text-slate-900 leading-tight">Estúdio de Atividades</h1>
-          <p class="text-xs text-slate-500">Editoração Pedagógica em Folha A4 Retrato</p>
+          <p class="text-xs text-slate-500">Editoração Pedagógica em Folha A4 Retrato <span id="dbStatusBadge" class="ml-1 px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold text-[10px]"></span></p>
         </div>
       </div>
       <div class="flex items-center gap-2">
@@ -405,7 +420,7 @@
           </button>
           <button onclick="switchRibbonTab('alfabetizacao')" id="tabBtn-alfabetizacao" class="ribbon-tab">
             <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-            Alfabetização
+            Alfabetização (11)
           </button>
           <button onclick="switchRibbonTab('matematica')" id="tabBtn-matematica" class="ribbon-tab">
             <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -444,6 +459,40 @@
     </main>
   </div>
 
+  <!-- ==================== MINI-MODAL BUSCADOR DE BANCO DE IMAGENS + UPLOAD ==================== -->
+  <div id="mediaPickerBackdrop" class="fixed inset-0 bg-slate-900/50 z-50 hidden items-center justify-center p-4" onclick="closeMediaPicker()">
+    <div class="bg-white rounded-xl shadow-2xl border border-slate-200 max-w-xl w-full overflow-hidden" onclick="event.stopPropagation()">
+      <div class="px-4 py-3 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+        <div>
+          <h3 class="text-sm font-bold text-slate-800">Selecionar Ilustração (Banco Local ou Upload)</h3>
+          <p class="text-[11px] text-slate-500">Pesquise nas figuras do banco local (.webp) ou envie um arquivo do seu dispositivo</p>
+        </div>
+        <button onclick="closeMediaPicker()" class="p-1 rounded hover:bg-slate-200 text-slate-500">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <div class="p-4 space-y-3">
+        <div class="flex items-center gap-2">
+          <div class="relative flex-1">
+            <input type="text" id="mediaPickerSearchInput" placeholder="Buscar palavra no banco (ex: abelha, bola, sapato, gato)..." oninput="renderMediaPickerGrid(this.value)" class="w-full border border-slate-300 rounded-lg pl-3 pr-3 py-2 text-xs font-semibold bg-slate-50 focus:bg-white focus:border-blue-600">
+          </div>
+          <button onclick="triggerDeviceFileUpload()" class="px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold flex items-center gap-1.5 shrink-0">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            Subir do PC/Tablet
+          </button>
+        </div>
+
+        <div id="mediaPickerGrid" class="grid grid-cols-4 sm:grid-cols-5 gap-2 max-h-64 overflow-y-auto p-1 border border-slate-200 rounded-lg bg-slate-50"></div>
+      </div>
+
+      <div class="px-4 py-2.5 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
+        <button onclick="clearCurrentPickedImage()" class="px-3 py-1 rounded text-xs font-semibold text-red-600 hover:bg-red-50">Remover Imagem do Item</button>
+        <button onclick="closeMediaPicker()" class="px-3 py-1 rounded border border-slate-300 text-xs font-semibold text-slate-600 hover:bg-slate-100">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ==================== MODAL DE SISTEMA (JSON E CONFIRMAÇÃO NATIVA) ==================== -->
   <div id="systemDialogBackdrop" class="fixed inset-0 bg-slate-900/50 z-50 hidden items-center justify-center p-4" onclick="handleBackdropClick(event)">
     <div id="systemDialogBox" class="bg-white rounded-xl shadow-2xl border border-slate-200 max-w-lg w-full overflow-hidden" onclick="event.stopPropagation()">
@@ -458,14 +507,107 @@
     </div>
   </div>
 
-  <!-- Input global para Upload de Imagens (Cabeçalho, Questão, Relacionar Colunas, Linha do Tempo, Alfabetização) -->
   <input type="file" id="hiddenImageInput" accept="image/*" class="hidden" onchange="handleGlobalImageUpload(event)">
 
   <script>
     /* ============================================================================
-       1. ESTADO GLOBAL E PERSISTÊNCIA LOCAL
+       1. PONTE DE INTEGRAÇÃO AUTOMÁTICA COM O DATABASE.JS (SE DISPONÍVEL)
        ============================================================================ */
-    const STORAGE_KEY = 'estudio_atividades_pwa_v4';
+    const FALLBACK_CATALOG = [
+      'abacaxi','abelha','arvore','aviao','banana','barco','batata','bebe','bola','bolo','boneca','bota',
+      'cabide','cachorro','caixa','caju','cama','caneca','carro','casa','cavalo','chave','chuva','cobra',
+      'cola','copo','dado','dedo','dente','doce','escova','espada','estrela','faca','fita','flor','foca',
+      'fogo','folha','formiga','galinha','galo','garfo','gato','gelo','girafa','gota','ilha','jacare',
+      'janela','jogo','laco','lago','lama','lata','leao','leite','limao','livro','lixo','lobo','lua',
+      'luva','maca','macaco','mala','mao','martelo','mato','meia','melao','menina','menino','mesa',
+      'milho','mola','moto','navio','ninho','nuvem','olho','osso','ovelha','ovo','panela','pao',
+      'passaro','pato','pe','peixe','pente','peteca','pipa','pirulito','planta','ponte','porta','pote',
+      'prato','queijo','rato','rede','rei','relogio','roda','rosa','roupa','rua','salada','sapato',
+      'sapo','sino','sofa','sol','suco','tambor','tapete','tatu','teia','tela','teto','tigre','tijolo',
+      'tomate','trator','trem','tucano','urso','uva','vaca','vassoura','vela','violao','xicara','zebra'
+    ];
+
+    function getCatalogSlugs() {
+      if (typeof REPO_WORDS_CATALOG !== 'undefined' && Array.isArray(REPO_WORDS_CATALOG)) {
+        return REPO_WORDS_CATALOG;
+      }
+      return FALLBACK_CATALOG;
+    }
+
+    function toCleanSlug(str) {
+      return String(str || '')
+        .trim()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replace(/[-\/;]/g, '')
+        .replace(/[^a-z0-9_]/g, '');
+    }
+
+    // Retorna { word, syllables, img } puxando do WORD_BANK do database.js quando existir
+    function lookupWordInDatabase(rawInput) {
+      const rawUpper = String(rawInput || '').trim().toUpperCase();
+      const cleanWord = rawUpper.replace(/[-\/;]/g, '');
+      const slug = toCleanSlug(cleanWord);
+
+      // 1. Se o professor digitou com hífen explícito (ex: CA-CHOR-RO)
+      const explicitSyls = rawUpper.includes('-')
+        ? rawUpper.split('-').map(s => s.trim()).filter(Boolean)
+        : null;
+
+      // 2. Consulta WORD_BANK do database.js
+      if (typeof WORD_BANK !== 'undefined' && WORD_BANK[cleanWord]) {
+        const entry = WORD_BANK[cleanWord];
+        return {
+          word: entry.word || cleanWord,
+          syllables: explicitSyls || (Array.isArray(entry.syllables) ? [...entry.syllables] : [cleanWord]),
+          img: entry.img || `assets/img/palavras/${slug}.webp`
+        };
+      }
+
+      // 3. Verifica se o slug está no catálogo de imagens .webp
+      const catalog = getCatalogSlugs();
+      const hasWebp = catalog.includes(slug);
+      return {
+        word: cleanWord,
+        syllables: explicitSyls || [cleanWord],
+        img: hasWebp ? `assets/img/palavras/${slug}.webp` : ''
+      };
+    }
+
+    // Apoio Intrassilábico (Consoante Preta, Vogal Vermelha, Moldura Silábica Azul)
+    function isVowelChar(ch) {
+      return /^[AEIOUÁÉÍÓÚÂÊÔÃÕÜ]$/i.test(ch);
+    }
+
+    function formatWithIntrasyllabicSupport(rawWordOrPhrase, useColorCV, useSylBox) {
+      const str = String(rawWordOrPhrase || '').trim();
+      if (!str) return '';
+      if (!useColorCV && !useSylBox) return escapeHtml(str.replace(/-/g, ''));
+
+      const colorizeSeg = (seg) => {
+        if (!useColorCV) return escapeHtml(seg);
+        return seg.split('').map(ch => {
+          if (!/[A-ZÁÉÍÓÚÂÊÔÃÕÇÜ]/i.test(ch)) return escapeHtml(ch);
+          const color = isVowelChar(ch) ? '#dc2626' : '#0f172a';
+          return `<span style="color:${color};">${escapeHtml(ch)}</span>`;
+        }).join('');
+      };
+
+      // Divide cada palavra da frase respeitando hífens ou buscando as sílabas no WORD_BANK
+      const words = str.split(/\s+/);
+      return words.map(w => {
+        if (!useSylBox) return colorizeSeg(w.replace(/-/g, ''));
+        const info = lookupWordInDatabase(w);
+        const syls = info.syllables && info.syllables.length > 0 ? info.syllables : [w.replace(/-/g, '')];
+        return syls.map(s => `<span class="syl-box-chip">${colorizeSeg(s)}</span>`).join('');
+      }).join(' ');
+    }
+
+    /* ============================================================================
+       2. ESTADO GLOBAL E PERSISTÊNCIA LOCAL
+       ============================================================================ */
+    const STORAGE_KEY = 'estudio_atividades_pwa_v5';
 
     const SUBJECTS = {
       portugues:  { label: 'Língua Portuguesa', color: '#2563eb', bg: '#dbeafe', icon: '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>' },
@@ -527,8 +669,20 @@
       return null;
     }
 
+    function deterministicShuffle(arr, seedNum = 1) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = (i * 7 + seedNum * 13) % (i + 1);
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      if (copy.length > 1 && copy.join('') === arr.join('')) {
+        [copy[0], copy[copy.length - 1]] = [copy[copy.length - 1], copy[0]];
+      }
+      return copy;
+    }
+
     /* ============================================================================
-       2. GERENCIAMENTO DA TELA INICIAL (HOME)
+       3. TELA INICIAL (HOME)
        ============================================================================ */
     function createBlankDocument(subjectKey = 'portugues') {
       const rowId = uid();
@@ -601,6 +755,12 @@
     }
 
     function renderHomeView() {
+      const badge = document.getElementById('dbStatusBadge');
+      if (badge) {
+        const count = typeof WORD_BANK !== 'undefined' ? Object.keys(WORD_BANK).length : getCatalogSlugs().length;
+        badge.textContent = `Banco Integrado: ${count} palavras/figuras`;
+      }
+
       const filterBar = document.getElementById('subjectFilterBar');
       let filterHtml = `
         <button onclick="state.activeSubjectFilter='todas';renderHomeView()" class="px-3 py-1 rounded-full text-xs font-semibold transition ${state.activeSubjectFilter === 'todas' ? 'bg-slate-900 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100'}">
@@ -664,7 +824,7 @@
     }
 
     /* ============================================================================
-       3. CATÁLOGO DE 30 MÓDULOS PEDAGÓGICOS (COM IMAGEM EM PARES/CARTÕES)
+       4. CATÁLOGO DE 36 MÓDULOS PEDAGÓGICOS (COM OS 6 NOVOS DE ALFABETIZAÇÃO)
        ============================================================================ */
     const BLOCK_TYPES = {
       // ESTRUTURA
@@ -712,8 +872,7 @@
         numbered: true,
         defaultData: () => ({
           statement: '',
-          hideStatement: false,
-          boldCommand: false
+          hideStatement: false
         })
       },
       multipla_escolha: {
@@ -723,7 +882,6 @@
           statement: '',
           hideStatement: false,
           columns: 1,
-          marker: 'circle',
           correctIndex: 0,
           options: ['', '', '', '']
         })
@@ -759,6 +917,8 @@
         defaultData: () => ({
           statement: '',
           hideStatement: false,
+          colorCV: false,
+          sylBox: false,
           pairs: [
             { leftText: '', leftImg: '', rightText: '', rightImg: '', key: '1' },
             { leftText: '', leftImg: '', rightText: '', rightImg: '', key: '2' },
@@ -777,17 +937,100 @@
         })
       },
 
-      // ALFABETIZAÇÃO & LINGUAGENS
+      // ALFABETIZAÇÃO & LINGUAGENS (11 MÓDULOS)
       caligrafia: {
         label: 'Pauta de Caligrafia (Cursiva/Bastão)',
         numbered: true,
         defaultData: () => ({
           statement: '',
           hideStatement: false,
-          fontStyle: 'cursiva', // 'cursiva' (MamaeQueNosFaz) | 'bastao'
+          fontStyle: 'cursiva',
           lines: [
-            { text: '', emptyPracticeRows: 1 },
-            { text: '', emptyPracticeRows: 1 }
+            { text: '' },
+            { text: '' }
+          ]
+        })
+      },
+      crmts_silabas: {
+        label: 'CRMTS: Sílabas Embaralhadas c/ Figura',
+        numbered: true,
+        defaultData: () => ({
+          statement: '',
+          hideStatement: false,
+          cols: 2,
+          colorCV: false,
+          sylBox: true,
+          items: [
+            { word: 'CAVALO', img: 'assets/img/palavras/cavalo.webp' },
+            { word: 'SAPATO', img: 'assets/img/palavras/sapato.webp' },
+            { word: 'PANELA', img: 'assets/img/palavras/panela.webp' },
+            { word: 'BONECA', img: 'assets/img/palavras/boneca.webp' }
+          ]
+        })
+      },
+      segmentar_frases: {
+        label: 'Segmentar Frases Aglutinadas',
+        numbered: true,
+        defaultData: () => ({
+          statement: '',
+          hideStatement: false,
+          colorCV: false,
+          sylBox: false,
+          sentences: [
+            'O GATO BEBEU O LEITE',
+            'A MENINA CHUTOU A BOLA'
+          ]
+        })
+      },
+      palavra_intrusa: {
+        label: 'Palavra Intrusa (Coerência)',
+        numbered: true,
+        defaultData: () => ({
+          statement: '',
+          hideStatement: false,
+          colorCV: false,
+          sylBox: false,
+          items: [
+            { sentence: 'O MENINO COMEU A PEDRA NA COZINHA.', intruder: 'PEDRA', replacement: 'MAÇÃ' },
+            { sentence: 'A MENINA VESTIU A PANELA NO PÉ.', intruder: 'PANELA', replacement: 'MEIA' }
+          ]
+        })
+      },
+      generalizacao_tipografica: {
+        label: 'Generalização Tipográfica (CAIXA ALTA / minúsc. / Cursiva)',
+        numbered: true,
+        defaultData: () => ({
+          statement: '',
+          hideStatement: false,
+          mode: 'match_three', // 'match_three' (3 colunas p/ ligar) | 'write_missing' (preencher as outras 2)
+          colorCV: false,
+          sylBox: false,
+          words: ['BOLA', 'SAPATO', 'GATO', 'JANELA']
+        })
+      },
+      discriminar_vc: {
+        label: 'Quadro Vogal vs. Consoante (Pintar)',
+        numbered: true,
+        defaultData: () => ({
+          statement: '',
+          hideStatement: false,
+          rows: 3,
+          seed: 1,
+          letters: []
+        })
+      },
+      quadros_categorizacao: {
+        label: 'Quadros de Categorização Livre',
+        numbered: true,
+        defaultData: () => ({
+          statement: '',
+          hideStatement: false,
+          cols: 3,
+          boxLinesCount: 4, // 0 = em branco livre, >0 = linhas pautadas
+          categories: [
+            { title: 'Categoria 1' },
+            { title: 'Categoria 2' },
+            { title: 'Categoria 3' }
           ]
         })
       },
@@ -807,33 +1050,36 @@
         }
       },
       segmentacao_silabas: {
-        label: 'Segmentação de Palavras (Cartões)',
+        label: 'Segmentação de Sílabas e Letras',
         numbered: true,
         defaultData: () => ({
           statement: '',
           hideStatement: false,
           cols: 2,
-          mode: 'both', // 'syllables' | 'letters' | 'both'
+          mode: 'both',
+          colorCV: false,
+          sylBox: false,
           items: [
-            { img: '', word: 'SA-PO' },
-            { img: '', word: 'BO-LA' },
-            { img: '', word: 'CA-SA' },
-            { img: '', word: 'PA-TO' }
+            { img: 'assets/img/palavras/sapo.webp', word: 'SAPO' },
+            { img: 'assets/img/palavras/bola.webp', word: 'BOLA' },
+            { img: 'assets/img/palavras/casa.webp', word: 'CASA' },
+            { img: 'assets/img/palavras/pato.webp', word: 'PATO' }
           ]
         })
       },
       inicial_vogal: {
-        label: 'Letra / Sílaba Inicial (Múltiplos Cartões)',
+        label: 'Letra / Sílaba Inicial (Cartões)',
         numbered: true,
         defaultData: () => ({
           statement: '',
           hideStatement: false,
           cols: 3,
-          choiceSet: 'vowels', // 'vowels' (A E I O U) | 'custom'
+          colorCV: false,
+          sylBox: false,
           items: [
-            { img: '', label: 'ABELHA', target: 'A', options: ['A', 'E', 'I', 'O', 'U'] },
-            { img: '', label: 'ESTRELA', target: 'E', options: ['A', 'E', 'I', 'O', 'U'] },
-            { img: '', label: 'ILHA', target: 'I', options: ['A', 'E', 'I', 'O', 'U'] }
+            { img: 'assets/img/palavras/abelha.webp', label: 'ABELHA', target: 'A', options: ['A', 'E', 'I', 'O', 'U'] },
+            { img: 'assets/img/palavras/estrela.webp', label: 'ESTRELA', target: 'E', options: ['A', 'E', 'I', 'O', 'U'] },
+            { img: 'assets/img/palavras/ilha.webp', label: 'ILHA', target: 'I', options: ['A', 'E', 'I', 'O', 'U'] }
           ]
         })
       },
@@ -843,12 +1089,13 @@
         defaultData: () => ({
           statement: '',
           hideStatement: false,
-          cols: 3,
-          syllables: ['BO', 'LA', 'SA', 'PO', 'CA', 'SA', 'PA', 'TO', 'GA', 'TO'],
+          colorCV: false,
+          sylBox: true,
+          syllables: ['BO', 'LA', 'SA', 'PO', 'CA', 'SA', 'PA', 'TO'],
           items: [
-            { img: '', answer: 'BOLA' },
-            { img: '', answer: 'SAPO' },
-            { img: '', answer: 'CASA' }
+            { img: 'assets/img/palavras/bola.webp', answer: 'BOLA' },
+            { img: 'assets/img/palavras/sapo.webp', answer: 'SAPO' },
+            { img: 'assets/img/palavras/casa.webp', answer: 'CASA' }
           ]
         })
       },
@@ -1046,7 +1293,7 @@
     };
 
     /* ============================================================================
-       4. GERADOR DE MATRIZ DE CAÇA-PALAVRAS (100% OFFLINE E INSTANTÂNEO)
+       5. GERADOR DE CAÇA-PALAVRAS E GRADE VOGAL/CONSOANTE
        ============================================================================ */
     function generateWordSearchMatrix(wordsArr, size = 10) {
       const N = Math.max(8, Math.min(16, size));
@@ -1056,11 +1303,7 @@
         .map(w => String(w).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase().replace(/[^A-Z]/g, ''))
         .filter(w => w.length >= 2 && w.length <= N);
 
-      const dirs = [
-        [0, 1],  // Horizontal
-        [1, 0],  // Vertical
-      ];
-
+      const dirs = [[0, 1], [1, 0]];
       for (const word of cleanWords) {
         let placed = false;
         for (let attempt = 0; attempt < 80 && !placed; attempt++) {
@@ -1075,16 +1318,11 @@
           let canFit = true;
           for (let i = 0; i < word.length; i++) {
             const ch = grid[r0 + dr * i][c0 + dc * i];
-            if (ch !== '' && ch !== word[i]) {
-              canFit = false;
-              break;
-            }
+            if (ch !== '' && ch !== word[i]) { canFit = false; break; }
           }
-
           if (canFit) {
             for (let i = 0; i < word.length; i++) {
-              const rr = r0 + dr * i;
-              const cc = c0 + dc * i;
+              const rr = r0 + dr * i, cc = c0 + dc * i;
               grid[rr][cc] = word[i];
               placedCells[`${rr}_${cc}`] = true;
             }
@@ -1092,20 +1330,29 @@
           }
         }
       }
-
       const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
       for (let r = 0; r < N; r++) {
         for (let c = 0; c < N; c++) {
-          if (!grid[r][c]) {
-            grid[r][c] = alphabet[Math.floor(Math.random() * alphabet.length)];
-          }
+          if (!grid[r][c]) grid[r][c] = alphabet[Math.floor(Math.random() * alphabet.length)];
         }
       }
       return { grid, placedCells };
     }
 
+    function getRandomVowelsAndConsonants(totalCount, seed = 1) {
+      const vPool = ['A', 'E', 'I', 'O', 'U'];
+      const cPool = ['B', 'C', 'D', 'F', 'G', 'J', 'L', 'M', 'N', 'P', 'R', 'S', 'T', 'V', 'X', 'Z'];
+      const out = [];
+      for (let i = 0; i < totalCount; i++) {
+        const isV = ((i * 17 + seed * 31) % 5) < 2; // ~40% vogais, 60% consoantes
+        if (isV) out.push(vPool[(i * 7 + seed * 3) % vPool.length]);
+        else out.push(cPool[(i * 11 + seed * 5) % cPool.length]);
+      }
+      return out;
+    }
+
     /* ============================================================================
-       5. RENDERIZAÇÃO DA FAIXA RIBBON (GUIAS FIXAS + GUIA CONTEXTUAL)
+       6. FAIXA DE OPÇÕES (OFFICE RIBBON)
        ============================================================================ */
     function switchRibbonTab(tabId) {
       state.activeRibbonTab = tabId;
@@ -1334,17 +1581,13 @@
         bar.innerHTML = `
           <div class="ribbon-group">
             <div class="ribbon-group-content">
-              <button onclick="insertOrTransformBlock('caligrafia')" class="ribbon-btn text-blue-700">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
-                <span>Caligrafia</span>
-              </button>
-              <button onclick="insertOrTransformBlock('caca_palavras')" class="ribbon-btn text-blue-700">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
-                <span>Caça-Palavras</span>
+              <button onclick="insertOrTransformBlock('crmts_silabas')" class="ribbon-btn text-blue-700" title="Sílabas embaralhadas automaticamente sob estímulo imagem">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><line x1="3" y1="19" x2="21" y2="19"/></svg>
+                <span>CRMTS Sílabas</span>
               </button>
               <button onclick="insertOrTransformBlock('segmentacao_silabas')" class="ribbon-btn text-blue-700">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="6" width="6" height="6" rx="1"/><rect x="9" y="6" width="6" height="6" rx="1"/><rect x="16" y="6" width="6" height="6" rx="1"/></svg>
-                <span>Sílabas/Letras</span>
+                <span>Segmentar Pal.</span>
               </button>
               <button onclick="insertOrTransformBlock('inicial_vogal')" class="ribbon-btn text-blue-700">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><path d="M9 15l3-6 3 6"/><line x1="10" y1="13" x2="14" y2="13"/></svg>
@@ -1355,7 +1598,47 @@
                 <span>Banco Sílabas</span>
               </button>
             </div>
-            <div class="ribbon-group-title">Módulos de Alfabetização e Consciência Fonológica (Suportam Múltiplos Cartões c/ Imagem)</div>
+            <div class="ribbon-group-title">Consciência Fonológica & CRMTS (Banco .WebP Integrado)</div>
+          </div>
+
+          <div class="ribbon-group">
+            <div class="ribbon-group-content">
+              <button onclick="insertOrTransformBlock('generalizacao_tipografica')" class="ribbon-btn text-indigo-700" title="CAIXA ALTA, minúscula e Cursiva (MamãeQueNosFaz)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+                <span>Tipografia 3x</span>
+              </button>
+              <button onclick="insertOrTransformBlock('caligrafia')" class="ribbon-btn text-indigo-700">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+                <span>Caligrafia</span>
+              </button>
+              <button onclick="insertOrTransformBlock('segmentar_frases')" class="ribbon-btn text-indigo-700" title="Frases coladas para separar com barras e reescrever">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="3" x2="12" y2="21"/><path d="M4 12h5M15 12h5"/></svg>
+                <span>Frase Colada</span>
+              </button>
+              <button onclick="insertOrTransformBlock('palavra_intrusa')" class="ribbon-btn text-indigo-700" title="Identificar e substituir palavra intrusa na frase">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                <span>Pal. Intrusa</span>
+              </button>
+            </div>
+            <div class="ribbon-group-title">Tipografia, Frases & Coerência</div>
+          </div>
+
+          <div class="ribbon-group">
+            <div class="ribbon-group-content">
+              <button onclick="insertOrTransformBlock('discriminar_vc')" class="ribbon-btn text-emerald-700" title="Quadro de letras aleatórias para pintar Vogais e Consoantes">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+                <span>Vogal/Cons.</span>
+              </button>
+              <button onclick="insertOrTransformBlock('quadros_categorizacao')" class="ribbon-btn text-emerald-700" title="Quadros personalizáveis para classificar palavras, sílabas ou letras">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="8" height="16" rx="1"/><rect x="13" y="4" width="8" height="16" rx="1"/><line x1="3" y1="9" x2="11" y2="9"/><line x1="13" y1="9" x2="21" y2="9"/></svg>
+                <span>Categorizar</span>
+              </button>
+              <button onclick="insertOrTransformBlock('caca_palavras')" class="ribbon-btn text-emerald-700">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
+                <span>Caça-Palavras</span>
+              </button>
+            </div>
+            <div class="ribbon-group-title">Discriminação e Categorias</div>
           </div>
         `;
       } else if (tab === 'matematica') {
@@ -1466,8 +1749,14 @@
     }
 
     /* ============================================================================
-       6. GUIA CONTEXTUAL COMPLETA (COM SWITCH DE OCULTAR ENUNCIADO EM TUDO!)
+       7. GUIA CONTEXTUAL COMPLETA (COM APOIO INTRASSILÁBICO E NOVOS BLOCOS)
        ============================================================================ */
+    const BLOCKS_WITH_SYL_SUPPORT = [
+      'crmts_silabas', 'segmentar_frases', 'palavra_intrusa',
+      'generalizacao_tipografica', 'segmentacao_silabas',
+      'inicial_vogal', 'banco_silabas', 'relacionar_colunas'
+    ];
+
     function buildContextualRibbonHTML(row, slot) {
       const block = slot.block;
       const d = block.data;
@@ -1519,7 +1808,7 @@
               </label>
               <label class="flex items-center gap-1.5 text-[11px] font-medium text-slate-700 cursor-pointer">
                 <input type="checkbox" ${block.numbered ? 'checked' : ''} onchange="toggleBlockNumbered('${slot.id}', this.checked)" class="rounded text-blue-600">
-                <span>Numerar Questão (1, 2, 3...)</span>
+                <span>Numerar Questão</span>
               </label>
             </div>
           </div>
@@ -1527,13 +1816,29 @@
         </div>
       `;
 
-      // Ferramentas específicas do Bloco Selecionado
+      // Grupo transversal de Apoio Intrassilábico (Cor CV + Moldura Azul)
+      if (BLOCKS_WITH_SYL_SUPPORT.includes(block.type)) {
+        html += `
+          <div class="ribbon-group">
+            <div class="ribbon-group-content gap-2">
+              <button onclick="updateBlockProp('${slot.id}', 'colorCV', ${!d.colorCV})" class="ribbon-btn-sm border ${d.colorCV ? 'active border-red-500 text-red-700 bg-red-50' : 'border-slate-300'}" title="Consoantes em preto e Vogais em vermelho">
+                <span>Cor <b class="text-slate-900">C</b><b class="text-red-600">V</b></span>
+              </button>
+              <button onclick="updateBlockProp('${slot.id}', 'sylBox', ${!d.sylBox})" class="ribbon-btn-sm border ${d.sylBox ? 'active border-blue-600' : 'border-slate-300'}" title="Enquadra cada sílaba com moldura azul">
+                <span>[Moldura Silábica]</span>
+              </button>
+            </div>
+            <div class="ribbon-group-title">Apoio Intrassilábico</div>
+          </div>
+        `;
+      }
+
       switch (block.type) {
         case 'cabecalho':
           html += `
             <div class="ribbon-group">
               <div class="ribbon-group-content gap-2">
-                <button onclick="pickImageFor(url => updateBlockProp('${slot.id}', 'logoDataUrl', url))" class="ribbon-btn text-blue-700">
+                <button onclick="openMediaPicker(url => updateBlockProp('${slot.id}', 'logoDataUrl', url))" class="ribbon-btn text-blue-700">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                   <span>Subir Brasão</span>
                 </button>
@@ -1628,9 +1933,8 @@
               <div class="ribbon-group-content gap-2">
                 <button onclick="mutateBlockData('${slot.id}', data => { const n = data.pairs.length + 1; data.pairs.push({leftText:'', leftImg:'', rightText:'', rightImg:'', key:String(n)}); })" class="ribbon-btn-sm border border-blue-200 text-blue-700">+ Adicionar Par</button>
                 <button onclick="mutateBlockData('${slot.id}', data => { if(data.pairs.length>1) data.pairs.pop(); })" class="ribbon-btn-sm border border-slate-200">- Remover Par</button>
-                <span class="text-[11px] text-slate-500 bg-slate-100 px-2 py-1 rounded">Dica: Clique no ícone de câmera em qualquer item para relacionar imagens!</span>
               </div>
-              <div class="ribbon-group-title">Pares (Texto e/ou Imagem)</div>
+              <div class="ribbon-group-title">Pares (Texto e/ou Figura do Banco)</div>
             </div>
           `;
           break;
@@ -1643,7 +1947,7 @@
                   <input type="checkbox" ${d.showWordBank ? 'checked' : ''} onchange="updateBlockProp('${slot.id}', 'showWordBank', this.checked)">
                   <span>Mostrar Banco de Palavras</span>
                 </label>
-                <span class="text-[11px] text-slate-500 bg-slate-100 px-2 py-1 rounded">Use <b>[palavra]</b> entre colchetes para criar lacuna</span>
+                <span class="text-[11px] text-slate-500 bg-slate-100 px-2 py-1 rounded">Use <b>[palavra]</b> entre colchetes</span>
               </div>
               <div class="ribbon-group-title">Texto Lacunado</div>
             </div>
@@ -1654,12 +1958,104 @@
           html += `
             <div class="ribbon-group">
               <div class="ribbon-group-content gap-2">
-                <button onclick="updateBlockProp('${slot.id}', 'fontStyle', 'cursiva')" class="ribbon-btn-sm border ${d.fontStyle === 'cursiva' ? 'active border-blue-600' : 'border-slate-300'}">Fonte Cursiva (MamãeQueNosFaz)</button>
-                <button onclick="updateBlockProp('${slot.id}', 'fontStyle', 'bastao')" class="ribbon-btn-sm border ${d.fontStyle === 'bastao' ? 'active border-blue-600' : 'border-slate-300'}">Fonte Bastão (Caixa Alta)</button>
-                <button onclick="mutateBlockData('${slot.id}', data => data.lines.push({text:'', emptyPracticeRows:1}))" class="ribbon-btn-sm border border-blue-300 text-blue-700">+ Nova Pauta c/ Modelo</button>
-                <button onclick="mutateBlockData('${slot.id}', data => { if(data.lines.length>1) data.lines.pop(); })" class="ribbon-btn-sm border border-slate-300">- Remover Pauta</button>
+                <button onclick="updateBlockProp('${slot.id}', 'fontStyle', 'cursiva')" class="ribbon-btn-sm border ${d.fontStyle === 'cursiva' ? 'active border-blue-600' : 'border-slate-300'}">Cursiva (MamãeQueNosFaz)</button>
+                <button onclick="updateBlockProp('${slot.id}', 'fontStyle', 'bastao')" class="ribbon-btn-sm border ${d.fontStyle === 'bastao' ? 'active border-blue-600' : 'border-slate-300'}">Bastão (Caixa Alta)</button>
+                <button onclick="mutateBlockData('${slot.id}', data => data.lines.push({text:''}))" class="ribbon-btn-sm border border-blue-300 text-blue-700">+ Pauta</button>
+                <button onclick="mutateBlockData('${slot.id}', data => { if(data.lines.length>1) data.lines.pop(); })" class="ribbon-btn-sm border border-slate-300">- Pauta</button>
               </div>
-              <div class="ribbon-group-title">Caligrafia Cursiva e Bastão</div>
+              <div class="ribbon-group-title">Caligrafia</div>
+            </div>
+          `;
+          break;
+
+        case 'crmts_silabas':
+          html += `
+            <div class="ribbon-group">
+              <div class="ribbon-group-content gap-2">
+                <button onclick="mutateBlockData('${slot.id}', data => data.items.push({word:'TOMATE', img:'assets/img/palavras/tomate.webp'}))" class="ribbon-btn-sm border border-blue-300 text-blue-700">+ Cartão CRMTS</button>
+                <button onclick="mutateBlockData('${slot.id}', data => { if(data.items.length>1) data.items.pop(); })" class="ribbon-btn-sm border border-slate-300">- Cartão</button>
+                <select onchange="updateBlockProp('${slot.id}', 'cols', parseInt(this.value))" class="border border-slate-300 rounded px-2 py-1 text-xs font-bold bg-white">
+                  <option value="2" ${d.cols === 2 ? 'selected' : ''}>2 Colunas</option>
+                  <option value="3" ${d.cols === 3 ? 'selected' : ''}>3 Colunas</option>
+                </select>
+              </div>
+              <div class="ribbon-group-title">CRMTS (Digite a palavra e o app puxa a figura e embaralha as sílabas!)</div>
+            </div>
+          `;
+          break;
+
+        case 'segmentar_frases':
+          html += `
+            <div class="ribbon-group">
+              <div class="ribbon-group-content gap-2">
+                <button onclick="mutateBlockData('${slot.id}', data => data.sentences.push('O SAPO PULOU NA LAGOA'))" class="ribbon-btn-sm border border-blue-300 text-blue-700">+ Frase Aglutinada</button>
+                <button onclick="mutateBlockData('${slot.id}', data => { if(data.sentences.length>1) data.sentences.pop(); })" class="ribbon-btn-sm border border-slate-300">- Frase</button>
+              </div>
+              <div class="ribbon-group-title">Frases p/ Segmentar</div>
+            </div>
+          `;
+          break;
+
+        case 'palavra_intrusa':
+          html += `
+            <div class="ribbon-group">
+              <div class="ribbon-group-content gap-2">
+                <button onclick="mutateBlockData('${slot.id}', data => data.items.push({sentence:'O GATO BEBEU O SAPATO NO PIRES.', intruder:'SAPATO', replacement:'LEITE'}))" class="ribbon-btn-sm border border-blue-300 text-blue-700">+ Frase Intrusa</button>
+                <button onclick="mutateBlockData('${slot.id}', data => { if(data.items.length>1) data.items.pop(); })" class="ribbon-btn-sm border border-slate-300">- Frase</button>
+              </div>
+              <div class="ribbon-group-title">Coerência Semântica</div>
+            </div>
+          `;
+          break;
+
+        case 'generalizacao_tipografica':
+          html += `
+            <div class="ribbon-group">
+              <div class="ribbon-group-content gap-2">
+                <button onclick="mutateBlockData('${slot.id}', data => data.words.push('CAVALO'))" class="ribbon-btn-sm border border-blue-300 text-blue-700">+ Palavra</button>
+                <button onclick="mutateBlockData('${slot.id}', data => { if(data.words.length>2) data.words.pop(); })" class="ribbon-btn-sm border border-slate-300">- Palavra</button>
+                <select onchange="updateBlockProp('${slot.id}', 'mode', this.value)" class="border border-slate-300 rounded px-2 py-1 text-xs font-bold bg-white">
+                  <option value="match_three" ${d.mode === 'match_three' ? 'selected' : ''}>Ligar 3 Colunas (CAIXA ALTA ↔ minúsc. ↔ Cursiva)</option>
+                  <option value="write_missing" ${d.mode === 'write_missing' ? 'selected' : ''}>Tabela: Ler CAIXA ALTA e escrever minúsc. + Cursiva</option>
+                </select>
+              </div>
+              <div class="ribbon-group-title">Generalização Tipográfica</div>
+            </div>
+          `;
+          break;
+
+        case 'discriminar_vc':
+          html += `
+            <div class="ribbon-group">
+              <div class="ribbon-group-content gap-2">
+                <span class="text-xs font-semibold">Linhas:</span>
+                <button onclick="mutateBlockData('${slot.id}', data => { data.rows = Math.max(1, (data.rows||3)-1); data.letters=[]; })" class="ribbon-btn-sm border border-slate-300">-</button>
+                <span class="text-xs font-bold px-1">${d.rows || 3}</span>
+                <button onclick="mutateBlockData('${slot.id}', data => { data.rows = Math.min(10, (data.rows||3)+1); data.letters=[]; })" class="ribbon-btn-sm border border-blue-300 text-blue-700">+</button>
+                <button onclick="mutateBlockData('${slot.id}', data => { data.seed = (data.seed||1)+1; data.letters=[]; })" class="ribbon-btn-sm border border-emerald-300 text-emerald-700">Sortear Letras</button>
+              </div>
+              <div class="ribbon-group-title">Quadro Vogal vs. Consoante (Colunas automáticas pelo tamanho da faixa!)</div>
+            </div>
+          `;
+          break;
+
+        case 'quadros_categorizacao':
+          html += `
+            <div class="ribbon-group">
+              <div class="ribbon-group-content gap-2">
+                <button onclick="mutateBlockData('${slot.id}', data => data.categories.push({title:'Nova Categoria'}))" class="ribbon-btn-sm border border-blue-300 text-blue-700">+ Quadro</button>
+                <button onclick="mutateBlockData('${slot.id}', data => { if(data.categories.length>1) data.categories.pop(); })" class="ribbon-btn-sm border border-slate-300">- Quadro</button>
+                <select onchange="updateBlockProp('${slot.id}', 'cols', parseInt(this.value))" class="border border-slate-300 rounded px-2 py-1 text-xs font-bold bg-white">
+                  <option value="2" ${d.cols === 2 ? 'selected' : ''}>2 por Linha</option>
+                  <option value="3" ${d.cols === 3 ? 'selected' : ''}>3 por Linha</option>
+                  <option value="4" ${d.cols === 4 ? 'selected' : ''}>4 por Linha</option>
+                </select>
+                <div class="flex items-center gap-1 text-xs">
+                  <span>Linhas Internas:</span>
+                  <input type="number" min="0" max="12" value="${d.boxLinesCount ?? 4}" onchange="updateBlockProp('${slot.id}', 'boxLinesCount', parseInt(this.value)||0)" class="border border-slate-300 rounded w-12 text-center py-0.5" title="0 deixa o quadro em branco livre">
+                </div>
+              </div>
+              <div class="ribbon-group-title">Quadros de Categorização</div>
             </div>
           `;
           break;
@@ -1669,25 +2065,17 @@
             <div class="ribbon-group">
               <div class="ribbon-group-content gap-2">
                 <div class="flex flex-col gap-1">
-                  <label class="text-[10px] font-semibold text-slate-500">Palavras (separadas por vírgula):</label>
-                  <input type="text" value="${escapeAttr((d.words || []).join(', '))}" onchange="updateWordSearchWords('${slot.id}', this.value)" class="border border-slate-300 rounded px-2 py-1 text-xs w-64 font-bold uppercase">
+                  <label class="text-[10px] font-semibold text-slate-500">Palavras (vírgula):</label>
+                  <input type="text" value="${escapeAttr((d.words || []).join(', '))}" onchange="updateWordSearchWords('${slot.id}', this.value)" class="border border-slate-300 rounded px-2 py-1 text-xs w-56 font-bold uppercase">
                 </div>
-                <div class="flex flex-col gap-1">
-                  <label class="text-[10px] font-semibold text-slate-500">Tamanho:</label>
-                  <select onchange="updateWordSearchSize('${slot.id}', parseInt(this.value))" class="border border-slate-300 rounded px-2 py-1 text-xs font-bold bg-white">
-                    <option value="8" ${d.size === 8 ? 'selected' : ''}>8 x 8</option>
-                    <option value="10" ${d.size === 10 ? 'selected' : ''}>10 x 10</option>
-                    <option value="12" ${d.size === 12 ? 'selected' : ''}>12 x 12</option>
-                    <option value="14" ${d.size === 14 ? 'selected' : ''}>14 x 14</option>
-                  </select>
-                </div>
-                <button onclick="regenerateWordSearch('${slot.id}')" class="ribbon-btn-sm border border-blue-300 text-blue-700 mt-3">Sortear Posições</button>
-                <label class="flex items-center gap-1 text-xs font-medium cursor-pointer mt-3">
-                  <input type="checkbox" ${d.showWordBank ? 'checked' : ''} onchange="updateBlockProp('${slot.id}', 'showWordBank', this.checked)">
-                  <span>Quadro de Palavras</span>
-                </label>
+                <select onchange="updateWordSearchSize('${slot.id}', parseInt(this.value))" class="border border-slate-300 rounded px-2 py-1 text-xs font-bold bg-white mt-3">
+                  <option value="8" ${d.size === 8 ? 'selected' : ''}>8 x 8</option>
+                  <option value="10" ${d.size === 10 ? 'selected' : ''}>10 x 10</option>
+                  <option value="12" ${d.size === 12 ? 'selected' : ''}>12 x 12</option>
+                </select>
+                <button onclick="regenerateWordSearch('${slot.id}')" class="ribbon-btn-sm border border-blue-300 text-blue-700 mt-3">Sortear</button>
               </div>
-              <div class="ribbon-group-title">Gerador de Caça-Palavras</div>
+              <div class="ribbon-group-title">Caça-Palavras</div>
             </div>
           `;
           break;
@@ -1696,19 +2084,19 @@
           html += `
             <div class="ribbon-group">
               <div class="ribbon-group-content gap-2">
-                <button onclick="mutateBlockData('${slot.id}', data => data.items.push({img:'', word:'CA-SA'}))" class="ribbon-btn-sm border border-blue-300 text-blue-700">+ Cartão de Palavra</button>
+                <button onclick="mutateBlockData('${slot.id}', data => data.items.push({img:'assets/img/palavras/gato.webp', word:'GATO'}))" class="ribbon-btn-sm border border-blue-300 text-blue-700">+ Cartão</button>
                 <button onclick="mutateBlockData('${slot.id}', data => { if(data.items.length>1) data.items.pop(); })" class="ribbon-btn-sm border border-slate-300">- Cartão</button>
                 <select onchange="updateBlockProp('${slot.id}', 'cols', parseInt(this.value))" class="border border-slate-300 rounded px-2 py-1 text-xs font-bold bg-white">
-                  <option value="2" ${d.cols === 2 ? 'selected' : ''}>2 Cartões por Linha</option>
-                  <option value="3" ${d.cols === 3 ? 'selected' : ''}>3 Cartões por Linha</option>
+                  <option value="2" ${d.cols === 2 ? 'selected' : ''}>2 Colunas</option>
+                  <option value="3" ${d.cols === 3 ? 'selected' : ''}>3 Colunas</option>
                 </select>
                 <select onchange="updateBlockProp('${slot.id}', 'mode', this.value)" class="border border-slate-300 rounded px-2 py-1 text-xs bg-white">
-                  <option value="both" ${d.mode === 'both' ? 'selected' : ''}>Caixas de Sílabas + Letras</option>
-                  <option value="syllables" ${d.mode === 'syllables' ? 'selected' : ''}>Apenas Sílabas</option>
-                  <option value="letters" ${d.mode === 'letters' ? 'selected' : ''}>Apenas Letras</option>
+                  <option value="both" ${d.mode === 'both' ? 'selected' : ''}>Sílabas + Letras</option>
+                  <option value="syllables" ${d.mode === 'syllables' ? 'selected' : ''}>Só Sílabas</option>
+                  <option value="letters" ${d.mode === 'letters' ? 'selected' : ''}>Só Letras</option>
                 </select>
               </div>
-              <div class="ribbon-group-title">Múltiplos Cartões de Segmentação (Separe sílabas com hífen: BO-LA)</div>
+              <div class="ribbon-group-title">Segmentação (Puxa sílabas e imagem do database.js!)</div>
             </div>
           `;
           break;
@@ -1717,7 +2105,7 @@
           html += `
             <div class="ribbon-group">
               <div class="ribbon-group-content gap-2">
-                <button onclick="mutateBlockData('${slot.id}', data => data.items.push({img:'', label:'FIGURA', target:'A', options:['A','E','I','O','U']}))" class="ribbon-btn-sm border border-blue-300 text-blue-700">+ Cartão</button>
+                <button onclick="mutateBlockData('${slot.id}', data => data.items.push({img:'assets/img/palavras/ovo.webp', label:'OVO', target:'O', options:['A','E','I','O','U']}))" class="ribbon-btn-sm border border-blue-300 text-blue-700">+ Cartão</button>
                 <button onclick="mutateBlockData('${slot.id}', data => { if(data.items.length>1) data.items.pop(); })" class="ribbon-btn-sm border border-slate-300">- Cartão</button>
                 <select onchange="updateBlockProp('${slot.id}', 'cols', parseInt(this.value))" class="border border-slate-300 rounded px-2 py-1 text-xs font-bold bg-white">
                   <option value="2" ${d.cols === 2 ? 'selected' : ''}>2 Colunas</option>
@@ -1725,7 +2113,7 @@
                   <option value="4" ${d.cols === 4 ? 'selected' : ''}>4 Colunas</option>
                 </select>
               </div>
-              <div class="ribbon-group-title">Múltiplos Cartões de Letra/Sílaba Inicial</div>
+              <div class="ribbon-group-title">Letra Inicial</div>
             </div>
           `;
           break;
@@ -1735,13 +2123,13 @@
             <div class="ribbon-group">
               <div class="ribbon-group-content gap-2">
                 <div class="flex flex-col gap-1">
-                  <label class="text-[10px] font-semibold text-slate-500">Sílabas do Banco (separadas por vírgula):</label>
-                  <input type="text" value="${escapeAttr((d.syllables || []).join(', '))}" onchange="updateBlockProp('${slot.id}', 'syllables', this.value.split(',').map(s=>s.trim().toUpperCase()).filter(Boolean))" class="border border-slate-300 rounded px-2 py-1 text-xs w-56 font-bold uppercase">
+                  <label class="text-[10px] font-semibold text-slate-500">Sílabas (vírgula):</label>
+                  <input type="text" value="${escapeAttr((d.syllables || []).join(', '))}" onchange="updateBlockProp('${slot.id}', 'syllables', this.value.split(',').map(s=>s.trim().toUpperCase()).filter(Boolean))" class="border border-slate-300 rounded px-2 py-1 text-xs w-48 font-bold uppercase">
                 </div>
-                <button onclick="mutateBlockData('${slot.id}', data => data.items.push({img:'', answer:''}))" class="ribbon-btn-sm border border-blue-300 text-blue-700 mt-3">+ Item Figura</button>
-                <button onclick="mutateBlockData('${slot.id}', data => { if(data.items.length>1) data.items.pop(); })" class="ribbon-btn-sm border border-slate-300 mt-3">- Item</button>
+                <button onclick="mutateBlockData('${slot.id}', data => data.items.push({img:'assets/img/palavras/pato.webp', answer:'PATO'}))" class="ribbon-btn-sm border border-blue-300 text-blue-700 mt-3">+ Figura</button>
+                <button onclick="mutateBlockData('${slot.id}', data => { if(data.items.length>1) data.items.pop(); })" class="ribbon-btn-sm border border-slate-300 mt-3">- Figura</button>
               </div>
-              <div class="ribbon-group-title">Banco de Sílabas e Figuras</div>
+              <div class="ribbon-group-title">Banco de Sílabas</div>
             </div>
           `;
           break;
@@ -1767,14 +2155,14 @@
                 </select>
                 <label class="flex items-center gap-1 text-xs cursor-pointer">
                   <input type="checkbox" ${d.showReserve ? 'checked' : ''} onchange="updateBlockProp('${slot.id}', 'showReserve', this.checked)">
-                  <span>Círculos "Vai 1"</span>
+                  <span>"Vai 1"</span>
                 </label>
                 <label class="flex items-center gap-1 text-xs cursor-pointer">
                   <input type="checkbox" ${d.showQVL ? 'checked' : ''} onchange="updateBlockProp('${slot.id}', 'showQVL', this.checked)">
-                  <span>Q.V.L (C|D|U)</span>
+                  <span>Q.V.L</span>
                 </label>
               </div>
-              <div class="ribbon-group-title">Grade e QVL</div>
+              <div class="ribbon-group-title">Grade</div>
             </div>
           `;
           break;
@@ -1787,10 +2175,10 @@
                 <button onclick="mutateBlockData('${slot.id}', data => data.items.push({num:2, den:6}))" class="ribbon-btn-sm border border-blue-300 text-blue-700">+ Fração</button>
                 <button onclick="mutateBlockData('${slot.id}', data => { if(data.items.length>1) data.items.pop(); })" class="ribbon-btn-sm border border-slate-300">- Fração</button>
                 <button onclick="updateBlockProp('${slot.id}', 'shape', '${d.shape === 'circle' ? 'bar' : 'circle'}')" class="ribbon-btn-sm border border-slate-300">
-                  ${d.shape === 'circle' ? 'Usar Barras' : 'Usar Círculos (Pizza)'}
+                  ${d.shape === 'circle' ? 'Usar Barras' : 'Usar Círculos'}
                 </button>
               </div>
-              <div class="ribbon-group-title">Itens de Fração</div>
+              <div class="ribbon-group-title">Frações</div>
             </div>
           `;
           break;
@@ -1802,7 +2190,7 @@
                 <button onclick="mutateBlockData('${slot.id}', data => data.items.push({n1:1, d1:3, n2:2, d2:6, missing:'n2'}))" class="ribbon-btn-sm border border-blue-300 text-blue-700">+ Equivalência</button>
                 <button onclick="mutateBlockData('${slot.id}', data => { if(data.items.length>1) data.items.pop(); })" class="ribbon-btn-sm border border-slate-300">- Equivalência</button>
               </div>
-              <div class="ribbon-group-title">Pares Equivalentes</div>
+              <div class="ribbon-group-title">Equivalentes</div>
             </div>
           `;
           break;
@@ -1828,7 +2216,7 @@
                 `).join('')}
                 <button onclick="mutateBlockData('${slot.id}', data => { if(data.polygons.length>1) data.polygons.pop(); })" class="ribbon-btn-sm text-red-600 border border-red-200">- Último</button>
               </div>
-              <div class="ribbon-group-title">Adicionar Polígono pelo Nº de Lados</div>
+              <div class="ribbon-group-title">Polígonos</div>
             </div>
           `;
           break;
@@ -1837,11 +2225,10 @@
           html += `
             <div class="ribbon-group">
               <div class="ribbon-group-content gap-2">
-                <button onclick="mutateBlockData('${slot.id}', data => { if(!data.lines) data.lines=[{start:0,step:5,count:8,hiddenIndices:[2,5]}]; data.lines.push({start:0, step:10, count:8, hiddenIndices:[3,6]}); })" class="ribbon-btn-sm border border-blue-300 text-blue-700">+ Adicionar Nova Reta</button>
-                <button onclick="mutateBlockData('${slot.id}', data => { if(data.lines && data.lines.length>1) data.lines.pop(); })" class="ribbon-btn-sm border border-slate-300">- Remover Reta</button>
-                <span class="text-[11px] text-blue-700 bg-blue-50 px-2 py-1 rounded">Clique nos números da reta no A4 para ocultar/mostrar!</span>
+                <button onclick="mutateBlockData('${slot.id}', data => { if(!data.lines) data.lines=[{start:0,step:5,count:8,hiddenIndices:[2,5]}]; data.lines.push({start:0, step:10, count:8, hiddenIndices:[3,6]}); })" class="ribbon-btn-sm border border-blue-300 text-blue-700">+ Nova Reta</button>
+                <button onclick="mutateBlockData('${slot.id}', data => { if(data.lines && data.lines.length>1) data.lines.pop(); })" class="ribbon-btn-sm border border-slate-300">- Reta</button>
               </div>
-              <div class="ribbon-group-title">Múltiplas Retas na Mesma Questão</div>
+              <div class="ribbon-group-title">Múltiplas Retas</div>
             </div>
           `;
           break;
@@ -1855,11 +2242,11 @@
                 <button onclick="mutateBlockData('${slot.id}', data => { if(data.numbers.length>1) data.numbers.pop(); })" class="ribbon-btn-sm border border-slate-300">- Item</button>
                 ${block.type === 'abaco_pinos' ? `
                   <button onclick="updateBlockProp('${slot.id}', 'mode', '${d.mode === 'read' ? 'draw' : 'read'}')" class="ribbon-btn-sm border border-slate-300">
-                    ${d.mode === 'read' ? 'Mudar p/ Aluno Desenhar Argolas' : 'Mudar p/ Aluno Contar Argolas'}
+                    ${d.mode === 'read' ? 'Aluno Desenha Argolas' : 'Aluno Conta Argolas'}
                   </button>
                 ` : ''}
               </div>
-              <div class="ribbon-group-title">Itens Decimais</div>
+              <div class="ribbon-group-title">Sistema Decimal</div>
             </div>
           `;
           break;
@@ -1913,7 +2300,6 @@
               <div class="ribbon-group-content gap-2">
                 <button onclick="mutateBlockData('${slot.id}', data => { if(data.events.length<6) data.events.push({date:'Data', img:'', label:'', hideLabel:false}); })" class="ribbon-btn-sm border border-blue-300 text-blue-700">+ Marco</button>
                 <button onclick="mutateBlockData('${slot.id}', data => { if(data.events.length>2) data.events.pop(); })" class="ribbon-btn-sm border border-slate-300">- Marco</button>
-                <span class="text-[11px] text-slate-500 bg-slate-100 px-2 py-1 rounded">Clique no quadro de foto do marco para subir imagem!</span>
               </div>
               <div class="ribbon-group-title">Linha do Tempo</div>
             </div>
@@ -1924,13 +2310,13 @@
           html += `
             <div class="ribbon-group">
               <div class="ribbon-group-content gap-2">
-                <button onclick="pickImageFor(url => mutateBlockData('${slot.id}', data => { data.mode='image'; data.imageUrl=url; }))" class="ribbon-btn-sm border border-blue-300 text-blue-700">Subir Imagem</button>
-                <button onclick="updateBlockProp('${slot.id}', 'mode', 'drawing')" class="ribbon-btn-sm border border-slate-300">Quadro de Desenho</button>
-                <span class="text-xs">Altura (cm):</span>
+                <button onclick="openMediaPicker(url => mutateBlockData('${slot.id}', data => { data.mode='image'; data.imageUrl=url; }))" class="ribbon-btn-sm border border-blue-300 text-blue-700">Escolher do Banco / Subir</button>
+                <button onclick="updateBlockProp('${slot.id}', 'mode', 'drawing')" class="ribbon-btn-sm border border-slate-300">Quadro Vazio</button>
+                <span class="text-xs">Alt.(cm):</span>
                 <input type="number" min="2" max="15" step="0.5" value="${d.boxHeightCm || 4}" onchange="updateBlockProp('${slot.id}', 'boxHeightCm', parseFloat(this.value)||4)" class="border border-slate-300 rounded w-14 text-center py-0.5 text-xs">
                 <label class="flex items-center gap-1 text-xs cursor-pointer">
                   <input type="checkbox" ${d.photocopyFilter ? 'checked' : ''} onchange="updateBlockProp('${slot.id}', 'photocopyFilter', this.checked)">
-                  <span>Filtro Fotocópia</span>
+                  <span>Fotocópia</span>
                 </label>
               </div>
               <div class="ribbon-group-title">Imagem e Quadro</div>
@@ -1963,7 +2349,7 @@
     }
 
     /* ============================================================================
-       7. OPERAÇÕES DE DADOS E PAGINAÇÃO REAL CORRIGIDA (EMPILHAMENTO CONTÍNUO)
+       8. OPERAÇÕES DO CANVAS E PAGINAÇÃO REAL
        ============================================================================ */
     function updateDocTitle(val) {
       const doc = getCurrentDoc();
@@ -2203,7 +2589,6 @@
       }
     }
 
-    /* MOTOR DE PAGINAÇÃO CORRIGIDO: Empilha os blocos na mesma página A4 até atingir 990px reais */
     function renderEditorAll() {
       renderRibbonHeader();
       renderCanvasPages();
@@ -2215,7 +2600,6 @@
       const container = document.getElementById('a4PagesContainer');
       container.innerHTML = '';
 
-      // Calcula numeração apenas para blocos que têm numbered=true e hideStatement=false
       let questionCounter = 1;
       const questionNumbersMap = {};
       for (const row of doc.rows) {
@@ -2231,13 +2615,12 @@
       container.appendChild(currentPage.pageEl);
       pages.push(currentPage);
 
-      const MAX_CONTENT_PX = 995; // Altura útil real dentro da página A4 antes do rodapé
+      const MAX_CONTENT_PX = 995;
 
       for (const row of doc.rows) {
         const rowEl = buildBentoRowDOM(row, questionNumbersMap);
         currentPage.contentEl.appendChild(rowEl);
 
-        // Como .a4-content agora tem flex-grow: 0, offsetHeight reflete 100% a soma real dos blocos!
         const usedHeight = currentPage.contentEl.offsetHeight;
         if (usedHeight > MAX_CONTENT_PX && currentPage.contentEl.children.length > 1) {
           currentPage.contentEl.removeChild(rowEl);
@@ -2248,7 +2631,6 @@
         }
       }
 
-      // Barra rápida para adicionar faixa no final da folha ativa (apenas modo edição)
       if (state.viewMode === 'edit') {
         const addBar = document.createElement('div');
         addBar.className = 'no-print mt-2 pt-2 border-t border-dashed border-slate-200 flex items-center justify-center gap-2';
@@ -2323,11 +2705,11 @@
     }
 
     /* ============================================================================
-       8. RENDERIZADORES WYSIWYG (SEM ELEMENTOS FANTASMAS E COM MULTI-ITENS)
+       9. RENDERIZADORES DOS BLOCOS (COM BANCO .WEBP E APOIO INTRASSILÁBICO)
        ============================================================================ */
-    function renderQuestionHeaderInline(slot, qNum, placeholder = 'Digite o enunciado (ou oculte na barra superior)...') {
+   function renderQuestionHeaderInline(slot, qNum, placeholder = 'Digite o enunciado (ou oculte na barra superior)...') {
       const d = slot.block.data;
-      if (d.hideStatement) return ''; // Modo "Item Livre": zero enunciado!
+      if (d.hideStatement) return '';
 
       const badge = qNum
         ? `<span class="inline-flex items-center justify-center bg-slate-900 text-white font-bold text-[10.5px] px-1.5 py-0.5 rounded mr-1.5 select-none">${qNum}.</span>`
@@ -2343,25 +2725,46 @@
       `;
     }
 
+    // Mini caixa de imagem conectada ao Seletor do Banco .webp + Upload Local
     function renderMiniImageBox(imgUrl, onClickJsCode, sizeClass = 'w-12 h-12') {
       if (imgUrl) {
         return `
-          <div onclick="${onClickJsCode}" title="Clique para trocar imagem" class="mini-img-slot ${sizeClass} border border-slate-300 bg-white">
-            <img src="${imgUrl}" class="w-full h-full object-contain">
+          <div onclick="event.stopPropagation(); ${onClickJsCode}" title="Clique para trocar a figura no banco ou enviar outra" class="mini-img-slot ${sizeClass} border border-slate-300 bg-white">
+            <img src="${imgUrl}" class="w-full h-full object-contain" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+            <span style="display:none;" class="w-full h-full items-center justify-center text-[9px] text-slate-400 font-bold text-center p-0.5">Sem Fig.</span>
           </div>
         `;
       }
       return `
-        <div onclick="${onClickJsCode}" title="Adicionar imagem neste item" class="mini-img-slot empty ${sizeClass}">
+        <div onclick="event.stopPropagation(); ${onClickJsCode}" title="Escolher figura do banco .webp ou subir imagem" class="mini-img-slot empty ${sizeClass}">
           <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
         </div>
       `;
+    }
+
+    // Auto-preenche imagem do database.js quando o professor digita uma palavra conhecida
+    function updateWordAndAutoFetchMedia(slotId, itemIdx, rawVal, targetField = 'word', imgField = 'img') {
+      mutateBlockData(slotId, data => {
+        const cleanUpper = String(rawVal || '').trim().toUpperCase();
+        const info = lookupWordInDatabase(cleanUpper);
+        const item = data.items[itemIdx];
+        if (!item) return;
+        item[targetField] = cleanUpper;
+        if (info.img) {
+          item[imgField] = info.img;
+        }
+        if (targetField === 'label' && cleanUpper.length > 0) {
+          item.target = cleanUpper.charAt(0);
+        }
+      });
     }
 
     function renderBlockInnerHTML(slot, qNum) {
       const b = slot.block;
       const d = b.data;
       const isTeacher = state.viewMode === 'teacher';
+      const useCV = !!d.colorCV;
+      const useBox = !!d.sylBox;
 
       switch (b.type) {
         // 1. CABEÇALHO ESCOLAR
@@ -2388,7 +2791,7 @@
           return `
             <div class="border-2 border-slate-800 rounded p-2.5 text-xs">
               <div class="flex items-center gap-3 border-b border-slate-400 pb-2 mb-2">
-                <div onclick="pickImageFor(url => updateBlockProp('${slot.id}', 'logoDataUrl', url))" title="Clique para enviar brasão/logo" class="w-12 h-12 flex items-center justify-center border border-dashed border-slate-300 rounded cursor-pointer shrink-0 overflow-hidden">
+                <div onclick="event.stopPropagation(); openMediaPicker(url => updateBlockProp('${slot.id}', 'logoDataUrl', url))" title="Clique para enviar brasão/logo" class="w-12 h-12 flex items-center justify-center border border-dashed border-slate-300 rounded cursor-pointer shrink-0 overflow-hidden">
                   ${logoEl}
                 </div>
                 <div class="flex-1">
@@ -2428,13 +2831,13 @@
           `;
         }
 
-        // 3. TEXTO BASE (Sem fantasmas se Título ou Fonte ficarem em branco!)
+        // 3. TEXTO BASE
         case 'texto_base': {
           return `
             <div class="border border-slate-300 rounded p-2.5 text-xs">
               <div contenteditable="true" data-placeholder="Título do texto (opcional)" oninput="updateBlockProp('${slot.id}', 'title', this.innerText, true)" class="font-bold text-center text-slate-900 mb-1 hide-when-empty">${escapeHtml(d.title)}</div>
               <div contenteditable="true" data-placeholder="Digite ou cole o texto de leitura..." oninput="updateBlockProp('${slot.id}', 'body', this.innerText, true)" class="text-[11.5px] leading-relaxed text-justify text-slate-800 whitespace-pre-wrap" style="column-count: ${d.columns || 1}; column-gap: 16px;">${escapeHtml(d.body)}</div>
-              <div contenteditable="true" data-placeholder="Fonte / Referência (some na impressão se ficar vazio)" oninput="updateBlockProp('${slot.id}', 'source', this.innerText, true)" class="text-[9.5px] italic text-right text-slate-500 mt-1 hide-when-empty">${escapeHtml(d.source)}</div>
+              <div contenteditable="true" data-placeholder="Fonte / Referência (some na impressão se vazio)" oninput="updateBlockProp('${slot.id}', 'source', this.innerText, true)" class="text-[9.5px] italic text-right text-slate-500 mt-1 hide-when-empty">${escapeHtml(d.source)}</div>
             </div>
           `;
         }
@@ -2518,22 +2921,29 @@
           `;
         }
 
-        // 9. RELACIONAR COLUNAS (Agora suporta Imagem + Texto em qualquer um dos lados!)
+        // 9. RELACIONAR COLUNAS (Com busca de figuras no database.js + apoio intrassilábico)
         case 'relacionar_colunas': {
           const rowsHtml = d.pairs.map((p, idx) => {
-            const leftUploadCode = `pickImageFor(url => mutateBlockData('${slot.id}', data => data.pairs[${idx}].leftImg = url))`;
-            const rightUploadCode = `pickImageFor(url => mutateBlockData('${slot.id}', data => data.pairs[${idx}].rightImg = url))`;
+            const leftUploadCode = `openMediaPicker(url => mutateBlockData('${slot.id}', data => data.pairs[${idx}].leftImg = url))`;
+            const rightUploadCode = `openMediaPicker(url => mutateBlockData('${slot.id}', data => data.pairs[${idx}].rightImg = url))`;
+            const leftDisplay = (useCV || useBox) && state.viewMode !== 'edit'
+              ? formatWithIntrasyllabicSupport(p.leftText, useCV, useBox)
+              : escapeHtml(p.leftText || '');
+            const rightDisplay = (useCV || useBox) && state.viewMode !== 'edit'
+              ? formatWithIntrasyllabicSupport(p.rightText, useCV, useBox)
+              : escapeHtml(p.rightText || '');
+
             return `
               <div class="grid grid-cols-2 gap-4 items-center text-xs py-1 border-b border-dashed border-slate-200 last:border-none">
                 <div class="flex items-center gap-2">
                   <span class="font-bold text-slate-800">(${idx + 1})</span>
                   ${renderMiniImageBox(p.leftImg, leftUploadCode, 'w-11 h-11')}
-                  <div contenteditable="true" data-placeholder="Texto ou deixe só a imagem..." oninput="mutateBlockData('${slot.id}', data => data.pairs[${idx}].leftText = this.innerText, true)" class="flex-1 hide-when-empty">${escapeHtml(p.leftText || '')}</div>
+                  <div contenteditable="true" data-placeholder="Texto ou imagem..." oninput="mutateBlockData('${slot.id}', data => data.pairs[${idx}].leftText = this.innerText, true)" class="flex-1 font-semibold hide-when-empty">${leftDisplay}</div>
                 </div>
                 <div class="flex items-center gap-2">
                   <span class="font-mono font-bold text-slate-800 shrink-0">(${isTeacher ? `<span class="text-blue-700">${escapeHtml(p.key || String(idx + 1))}</span>` : '&nbsp;&nbsp;&nbsp;'})</span>
                   ${renderMiniImageBox(p.rightImg, rightUploadCode, 'w-11 h-11')}
-                  <div contenteditable="true" data-placeholder="Correspondente..." oninput="mutateBlockData('${slot.id}', data => data.pairs[${idx}].rightText = this.innerText, true)" class="flex-1 hide-when-empty">${escapeHtml(p.rightText || '')}</div>
+                  <div contenteditable="true" data-placeholder="Correspondente..." oninput="mutateBlockData('${slot.id}', data => data.pairs[${idx}].rightText = this.innerText, true)" class="flex-1 font-semibold hide-when-empty">${rightDisplay}</div>
                 </div>
               </div>
             `;
@@ -2572,10 +2982,10 @@
           `;
         }
 
-        // 11. CALIGRAFIA REFEITA (Edição fluida direto na pauta + Fonte MamaeQueNosFaz ou Bastão)
+        // 11. CALIGRAFIA (Cursiva MamaeQueNosFaz ou Bastão)
         case 'caligrafia': {
           const fontClass = d.fontStyle === 'bastao' ? 'font-bastao' : 'font-cursiva';
-          const linesArr = d.lines || [{ text: '', emptyPracticeRows: 1 }];
+          const linesArr = d.lines || [{ text: '' }];
           const linesHtml = linesArr.map((ln, idx) => `
             <div class="mb-1">
               <div class="caligraphy-row">
@@ -2595,7 +3005,244 @@
           `;
         }
 
-        // 12. GERADOR DE CAÇA-PALAVRAS AUTOMÁTICO
+        // 12. NOVO: CRMTS DE SÍLABAS EMBARALHADAS COM ESTÍMULO IMAGEM (.WEBP DO DATABASE.JS)
+        case 'crmts_silabas': {
+          const gridCols = d.cols === 3 ? 'grid-cols-3' : 'grid-cols-2';
+          const cardsHtml = (d.items || []).map((it, idx) => {
+            const dbInfo = lookupWordInDatabase(it.word || '');
+            const syls = dbInfo.syllables.length > 1
+              ? dbInfo.syllables
+              : (String(it.word || '').includes('-') ? it.word.split('-') : [dbInfo.word]);
+            const shuffledSyls = deterministicShuffle(syls, idx + 3);
+            const imgSrc = it.img || dbInfo.img;
+            const uploadCode = `openMediaPicker(url => mutateBlockData('${slot.id}', data => data.items[${idx}].img = url))`;
+
+            const chipsHtml = shuffledSyls.map(s => `
+              <span class="px-2 py-0.5 border-2 border-slate-700 rounded-md bg-slate-50 font-extrabold text-xs">
+                ${formatWithIntrasyllabicSupport(s, useCV, false)}
+              </span>
+            `).join('');
+
+            return `
+              <div class="border border-slate-300 rounded-lg p-2 flex items-center gap-2.5">
+                ${renderMiniImageBox(imgSrc, uploadCode, 'w-14 h-14')}
+                <div class="flex-1 flex flex-col gap-1.5">
+                  ${state.viewMode === 'edit' ? `
+                    <input type="text" value="${escapeAttr(it.word)}" placeholder="Palavra (ex: CAVALO ou CA-VA-LO)" onchange="updateWordAndAutoFetchMedia('${slot.id}', ${idx}, this.value, 'word', 'img')" class="no-print w-full border border-blue-300 rounded px-1.5 py-0.5 text-[10px] font-bold uppercase bg-blue-50/30">
+                  ` : ''}
+                  <div class="flex flex-wrap gap-1">${chipsHtml}</div>
+                  <div class="h-6 border-b-2 border-slate-800 flex items-end justify-center font-bold text-xs text-blue-700">
+                    ${isTeacher ? formatWithIntrasyllabicSupport(dbInfo.word, useCV, useBox) : ''}
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('');
+
+          return `
+            <div>
+              ${renderQuestionHeaderInline(slot, qNum, 'Ordene as sílabas em destaque para escrever o nome de cada figura:')}
+              <div class="grid ${gridCols} gap-2.5">${cardsHtml}</div>
+            </div>
+          `;
+        }
+
+        // 13. NOVO: SEGMENTAÇÃO DE FRASES AGLUTINADAS (Adaptação do E5_2 / WORD_SPACE)
+        case 'segmentar_frases': {
+          const rowsHtml = (d.sentences || []).map((sent, idx) => {
+            const cleanSent = String(sent || '').trim().toUpperCase();
+            const glued = cleanSent.replace(/\s+/g, '');
+            const teacherSeparated = cleanSent.split(/\s+/).join(' | ');
+            return `
+              <div class="border border-slate-300 rounded p-2 space-y-1.5">
+                <div class="flex items-center justify-between gap-2">
+                  <div class="font-mono font-extrabold text-sm tracking-widest text-slate-900">
+                    ${isTeacher ? `<span class="text-blue-700">${escapeHtml(teacherSeparated)}</span>` : formatWithIntrasyllabicSupport(glued, useCV, false)}
+                  </div>
+                  ${state.viewMode === 'edit' ? `
+                    <input type="text" value="${escapeAttr(cleanSent)}" placeholder="Digite a frase com espaços..." onchange="mutateBlockData('${slot.id}', data => data.sentences[${idx}] = this.value.toUpperCase())" class="no-print border border-blue-300 rounded px-2 py-0.5 text-[10px] font-bold uppercase w-56 bg-blue-50/30">
+                  ` : ''}
+                </div>
+                <div class="h-6 border-b border-slate-500 flex items-end px-1 text-xs font-bold text-blue-700">
+                  ${isTeacher ? escapeHtml(cleanSent) : ''}
+                </div>
+              </div>
+            `;
+          }).join('');
+
+          return `
+            <div>
+              ${renderQuestionHeaderInline(slot, qNum, 'Separe as palavras das frases com um traço vertical (|) e reescreva-as corretamente:')}
+              <div class="space-y-2">${rowsHtml}</div>
+            </div>
+          `;
+        }
+
+        // 14. NOVO: PALAVRA INTRUSA / COERÊNCIA SEMÂNTICA (Adaptação do E5_6)
+        case 'palavra_intrusa': {
+          const rowsHtml = (d.items || []).map((it, idx) => `
+            <div class="border border-slate-300 rounded p-2 space-y-1.5 text-xs">
+              <div class="flex items-center justify-between gap-2">
+                <div contenteditable="true" oninput="mutateBlockData('${slot.id}', data => data.items[${idx}].sentence = this.innerText.toUpperCase(), true)" class="font-bold text-slate-900 flex-1">
+                  ${formatWithIntrasyllabicSupport(it.sentence, useCV, useBox)}
+                </div>
+                ${state.viewMode === 'edit' ? `
+                  <div class="no-print flex items-center gap-1 text-[10px]">
+                    <input type="text" value="${escapeAttr(it.intruder)}" placeholder="Intrusa" onchange="mutateBlockData('${slot.id}', data => data.items[${idx}].intruder = this.value.toUpperCase())" class="w-20 border border-red-300 rounded px-1 py-0.5 font-bold uppercase text-red-700">
+                    <span>→</span>
+                    <input type="text" value="${escapeAttr(it.replacement)}" placeholder="Correta" onchange="mutateBlockData('${slot.id}', data => data.items[${idx}].replacement = this.value.toUpperCase())" class="w-20 border border-emerald-300 rounded px-1 py-0.5 font-bold uppercase text-emerald-700">
+                  </div>
+                ` : ''}
+              </div>
+              <div class="flex items-center gap-4 text-[11px] text-slate-700 pt-0.5">
+                <div>Palavra intrusa: <span class="inline-block border-b border-slate-700 min-w-[90px] text-center font-bold text-red-600">${isTeacher ? escapeHtml(it.intruder) : ''}</span></div>
+                <div class="flex-1">Substituir por: <span class="inline-block border-b border-slate-700 min-w-[90px] text-center font-bold text-blue-700">${isTeacher ? escapeHtml(it.replacement) : ''}</span></div>
+              </div>
+            </div>
+          `).join('');
+
+          return `
+            <div>
+              ${renderQuestionHeaderInline(slot, qNum, 'Leia as frases, circule a palavra intrusa que não faz sentido e escreva uma palavra adequada:')}
+              <div class="space-y-2">${rowsHtml}</div>
+            </div>
+          `;
+        }
+
+        // 15. NOVO: GENERALIZAÇÃO TIPOGRÁFICA (CAIXA ALTA ↔ minúscula ↔ Cursiva MamãeQueNosFaz)
+        case 'generalizacao_tipografica': {
+          const words = (d.words || ['BOLA', 'SAPATO', 'GATO']).map(w => String(w).trim().toUpperCase());
+
+          if (d.mode === 'write_missing') {
+            const rowsHtml = words.map((w, idx) => `
+              <tr>
+                <td class="border border-slate-600 px-2 py-1.5 font-extrabold text-xs text-center uppercase">
+                  <div contenteditable="true" oninput="mutateBlockData('${slot.id}', data => data.words[${idx}] = this.innerText.toUpperCase(), true)">${formatWithIntrasyllabicSupport(w, useCV, useBox)}</div>
+                </td>
+                <td class="border border-slate-600 px-2 py-1.5 text-center text-xs lowercase font-semibold text-blue-700">
+                  ${isTeacher ? escapeHtml(w.toLowerCase()) : ''}
+                </td>
+                <td class="border border-slate-600 px-2 py-1 text-center font-cursiva text-blue-700">
+                  ${isTeacher ? escapeHtml(w.toLowerCase()) : ''}
+                </td>
+              </tr>
+            `).join('');
+
+            return `
+              <div>
+                ${renderQuestionHeaderInline(slot, qNum, 'Transcreva as palavras para a letra de imprensa minúscula e para a letra cursiva:')}
+                <table class="w-full border-collapse">
+                  <thead>
+                    <tr class="bg-slate-100 text-[10px] font-bold uppercase text-slate-700">
+                      <th class="border border-slate-600 py-1 w-1/3">Imprensa Maiúscula</th>
+                      <th class="border border-slate-600 py-1 w-1/3">Imprensa Minúscula</th>
+                      <th class="border border-slate-600 py-1 w-1/3">Letra Cursiva</th>
+                    </tr>
+                  </thead>
+                  <tbody>${rowsHtml}</tbody>
+                </table>
+              </div>
+            `;
+          }
+
+          // Modo 3 Colunas para Ligar (CAIXA ALTA | minúscula | Cursiva)
+          const col2 = deterministicShuffle(words, 2);
+          const col3 = deterministicShuffle(words, 5);
+
+          const rowsHtml = words.map((w, idx) => `
+            <div class="grid grid-cols-3 gap-6 items-center py-1 text-xs">
+              <div class="border border-slate-400 rounded px-2.5 py-1 font-extrabold uppercase text-center flex items-center justify-between">
+                <div contenteditable="true" oninput="mutateBlockData('${slot.id}', data => data.words[${idx}] = this.innerText.toUpperCase(), true)" class="flex-1">${formatWithIntrasyllabicSupport(w, useCV, useBox)}</div>
+                <span class="w-2 h-2 rounded-full bg-slate-800"></span>
+              </div>
+              <div class="border border-slate-400 rounded px-2.5 py-1 lowercase font-semibold text-center flex items-center justify-between">
+                <span class="w-2 h-2 rounded-full bg-slate-800"></span>
+                <span>${escapeHtml(col2[idx].toLowerCase())}</span>
+                <span class="w-2 h-2 rounded-full bg-slate-800"></span>
+              </div>
+              <div class="border border-slate-400 rounded px-2.5 py-0.5 font-cursiva text-center flex items-center justify-between">
+                <span class="w-2 h-2 rounded-full bg-slate-800"></span>
+                <span class="flex-1">${escapeHtml(col3[idx].toLowerCase())}</span>
+              </div>
+            </div>
+          `).join('');
+
+          return `
+            <div>
+              ${renderQuestionHeaderInline(slot, qNum, 'Ligue cada palavra em CAIXA ALTA à sua forma em letra minúscula e em letra cursiva:')}
+              <div class="space-y-1">${rowsHtml}</div>
+            </div>
+          `;
+        }
+
+        // 16. NOVO: QUADRO DE DISCRIMINAÇÃO VOGAL VS. CONSOANTE (Adapta colunas automaticamente à largura da faixa!)
+        case 'discriminar_vc': {
+          const colsBySpan = slot.span >= 12 ? 12 : slot.span >= 8 ? 8 : slot.span >= 6 ? 6 : 4;
+          const rowsCount = d.rows || 3;
+          const totalCells = colsBySpan * rowsCount;
+
+          if (!Array.isArray(d.letters) || d.letters.length !== totalCells) {
+            d.letters = getRandomVowelsAndConsonants(totalCells, d.seed || 1);
+          }
+
+          const cellsHtml = d.letters.map((ch, idx) => {
+            const isV = isVowelChar(ch);
+            const teacherBg = isTeacher
+              ? (isV ? 'bg-red-100 border-red-500 text-red-800' : 'bg-blue-100 border-blue-500 text-blue-800')
+              : 'bg-white border-slate-600 text-slate-900';
+            return `
+              <div contenteditable="true"
+                   oninput="mutateBlockData('${slot.id}', data => data.letters[${idx}] = this.innerText.trim().toUpperCase().slice(0,1), true)"
+                   class="h-8 border ${teacherBg} rounded flex items-center justify-center font-extrabold text-sm uppercase">
+                ${escapeHtml(ch)}
+              </div>
+            `;
+          }).join('');
+
+          return `
+            <div>
+              ${renderQuestionHeaderInline(slot, qNum, 'Pinte as VOGAIS de vermelho e as CONSOANTES de azul no quadro abaixo:')}
+              <div class="grid gap-1.5" style="grid-template-columns: repeat(${colsBySpan}, minmax(0, 1fr));">
+                ${cellsHtml}
+              </div>
+            </div>
+          `;
+        }
+
+        // 17. NOVO: QUADROS DE CATEGORIZAÇÃO LIVRE (Vogal/Consoante, Sílaba/Palavra, Categorias Semânticas, etc.)
+        case 'quadros_categorizacao': {
+          const gridCols = d.cols === 4 ? 'grid-cols-4' : d.cols === 2 ? 'grid-cols-2' : 'grid-cols-3';
+          const linesCount = d.boxLinesCount ?? 4;
+
+          const boxesHtml = (d.categories || []).map((cat, idx) => {
+            let innerLines = '';
+            if (linesCount > 0) {
+              for (let l = 0; l < linesCount; l++) {
+                innerLines += `<div class="h-6 border-b border-dashed border-slate-400"></div>`;
+              }
+            } else {
+              innerLines = `<div class="h-24"></div>`;
+            }
+
+            return `
+              <div class="border-2 border-slate-800 rounded-lg overflow-hidden flex flex-col">
+                <div class="bg-slate-200 border-b-2 border-slate-800 px-2 py-1 text-center font-extrabold text-xs uppercase text-slate-900">
+                  <div contenteditable="true" data-placeholder="TÍTULO DA CATEGORIA" oninput="mutateBlockData('${slot.id}', data => data.categories[${idx}].title = this.innerText, true)">${escapeHtml(cat.title)}</div>
+                </div>
+                <div class="p-2 flex-1 flex flex-col justify-around">${innerLines}</div>
+              </div>
+            `;
+          }).join('');
+
+          return `
+            <div>
+              ${renderQuestionHeaderInline(slot, qNum, 'Classifique os itens distribuindo-os nos quadros correspondentes:')}
+              <div class="grid ${gridCols} gap-3">${boxesHtml}</div>
+            </div>
+          `;
+        }
+
+        // 18. CAÇA-PALAVRAS
         case 'caca_palavras': {
           const gd = d.gridData || generateWordSearchMatrix(d.words || [], d.size || 10);
           const N = gd.grid.length;
@@ -2616,7 +3263,7 @@
 
           return `
             <div>
-              ${renderQuestionHeaderInline(slot, qNum, 'Encontre as palavras em destaque no diagrama abaixo:')}
+              ${renderQuestionHeaderInline(slot, qNum, 'Encontre as palavras no diagrama:')}
               ${bankHtml}
               <div class="flex justify-center">
                 <div class="inline-grid border border-slate-700" style="grid-template-columns: repeat(${N}, 1.5rem);">${cellsHtml}</div>
@@ -2625,28 +3272,30 @@
           `;
         }
 
-        // 13. CONSCIÊNCIA FONOLÓGICA / SEGMENTAÇÃO DE SÍLABAS E LETRAS (Múltiplos Cartões!)
+        // 19. SEGMENTAÇÃO DE SÍLABAS E LETRAS (Auto-busca sílabas e imagem .webp do database.js!)
         case 'segmentacao_silabas': {
           const gridCols = d.cols === 3 ? 'grid-cols-3' : 'grid-cols-2';
           const cardsHtml = (d.items || []).map((it, idx) => {
-            const syllables = String(it.word || '').toUpperCase().split('-').filter(Boolean);
+            const dbInfo = lookupWordInDatabase(it.word || '');
+            const syllables = dbInfo.syllables;
             const letters = syllables.join('').split('');
-            const uploadCode = `pickImageFor(url => mutateBlockData('${slot.id}', data => data.items[${idx}].img = url))`;
+            const imgSrc = it.img || dbInfo.img;
+            const uploadCode = `openMediaPicker(url => mutateBlockData('${slot.id}', data => data.items[${idx}].img = url))`;
 
             const sylBoxes = syllables.map(s => `
-              <div class="h-7 min-w-[34px] px-1 border-2 border-slate-800 rounded flex items-center justify-center font-bold text-xs text-blue-700">${isTeacher ? escapeHtml(s) : ''}</div>
+              <div class="h-7 min-w-[34px] px-1 border-2 border-slate-800 rounded flex items-center justify-center font-bold text-xs text-blue-700">${isTeacher ? formatWithIntrasyllabicSupport(s, useCV, false) : ''}</div>
             `).join('');
 
             const letBoxes = letters.map(l => `
-              <div class="w-6 h-6 border border-slate-600 rounded flex items-center justify-center font-bold text-xs text-blue-700">${isTeacher ? escapeHtml(l) : ''}</div>
+              <div class="w-6 h-6 border border-slate-600 rounded flex items-center justify-center font-bold text-xs text-blue-700">${isTeacher ? formatWithIntrasyllabicSupport(l, useCV, false) : ''}</div>
             `).join('');
 
             return `
               <div class="border border-slate-300 rounded p-2 flex items-center gap-2.5">
-                ${renderMiniImageBox(it.img, uploadCode, 'w-14 h-14')}
+                ${renderMiniImageBox(imgSrc, uploadCode, 'w-14 h-14')}
                 <div class="flex-1 space-y-1.5">
                   ${state.viewMode === 'edit' ? `
-                    <input type="text" value="${escapeAttr(it.word)}" placeholder="Ex: SA-PO" onchange="mutateBlockData('${slot.id}', data => data.items[${idx}].word = this.value.toUpperCase())" class="no-print w-full border border-blue-300 rounded px-1.5 py-0.5 text-[10px] font-bold uppercase">
+                    <input type="text" value="${escapeAttr(it.word)}" placeholder="Ex: SAPATO ou SA-PA-TO" onchange="updateWordAndAutoFetchMedia('${slot.id}', ${idx}, this.value, 'word', 'img')" class="no-print w-full border border-blue-300 rounded px-1.5 py-0.5 text-[10px] font-bold uppercase bg-blue-50/30">
                   ` : ''}
                   ${(d.mode === 'both' || d.mode === 'syllables') ? `<div class="flex flex-wrap gap-1">${sylBoxes}</div>` : ''}
                   ${(d.mode === 'both' || d.mode === 'letters') ? `<div class="flex flex-wrap gap-1">${letBoxes}</div>` : ''}
@@ -2663,11 +3312,13 @@
           `;
         }
 
-        // 14. IDENTIFICAÇÃO DE LETRA / SÍLABA INICIAL (Grade com Múltiplos Cartões!)
+        // 20. IDENTIFICAÇÃO DE LETRA INICIAL (Auto-busca figura .webp ao digitar o nome!)
         case 'inicial_vogal': {
           const gridCols = d.cols === 4 ? 'grid-cols-4' : d.cols === 2 ? 'grid-cols-2' : 'grid-cols-3';
           const cardsHtml = (d.items || []).map((it, idx) => {
-            const uploadCode = `pickImageFor(url => mutateBlockData('${slot.id}', data => data.items[${idx}].img = url))`;
+            const dbInfo = lookupWordInDatabase(it.label || '');
+            const imgSrc = it.img || dbInfo.img;
+            const uploadCode = `openMediaPicker(url => mutateBlockData('${slot.id}', data => data.items[${idx}].img = url))`;
             const opts = it.options || ['A', 'E', 'I', 'O', 'U'];
             const bubbles = opts.map(letter => {
               const isTarget = String(it.target).toUpperCase() === String(letter).toUpperCase();
@@ -2679,8 +3330,11 @@
 
             return `
               <div class="border border-slate-300 rounded p-2 flex flex-col items-center gap-1.5 text-center">
-                ${renderMiniImageBox(it.img, uploadCode, 'w-16 h-16')}
-                <div contenteditable="true" data-placeholder="Nome/Dica (opcional)" oninput="mutateBlockData('${slot.id}', data => data.items[${idx}].label = this.innerText, true)" class="text-[11px] font-bold uppercase tracking-wider text-slate-700 hide-when-empty">${escapeHtml(it.label || '')}</div>
+                ${renderMiniImageBox(imgSrc, uploadCode, 'w-16 h-16')}
+                <div contenteditable="true"
+                     data-placeholder="Palavra (ex: ABELHA)"
+                     onblur="updateWordAndAutoFetchMedia('${slot.id}', ${idx}, this.innerText, 'label', 'img')"
+                     class="text-[11px] font-bold uppercase tracking-wider text-slate-700 hide-when-empty">${formatWithIntrasyllabicSupport(it.label || '', useCV, useBox)}</div>
                 <div class="flex items-center justify-center gap-1 flex-wrap mt-0.5">${bubbles}</div>
               </div>
             `;
@@ -2694,20 +3348,22 @@
           `;
         }
 
-        // 15. FORMAÇÃO DE PALAVRAS COM BANCO DE SÍLABAS
+        // 21. BANCO DE SÍLABAS
         case 'banco_silabas': {
           const bankHtml = `
             <div class="border-2 border-slate-700 bg-slate-50 rounded-lg p-2 mb-2 flex flex-wrap items-center justify-center gap-2">
-              ${(d.syllables || []).map(syl => `<span class="px-2.5 py-1 bg-white border border-slate-500 rounded-full font-extrabold text-xs">${escapeHtml(syl)}</span>`).join('')}
+              ${(d.syllables || []).map(syl => `<span class="px-2.5 py-1 bg-white border border-slate-500 rounded-full font-extrabold text-xs">${formatWithIntrasyllabicSupport(syl, useCV, false)}</span>`).join('')}
             </div>
           `;
           const cardsHtml = (d.items || []).map((it, idx) => {
-            const uploadCode = `pickImageFor(url => mutateBlockData('${slot.id}', data => data.items[${idx}].img = url))`;
+            const dbInfo = lookupWordInDatabase(it.answer || '');
+            const imgSrc = it.img || dbInfo.img;
+            const uploadCode = `openMediaPicker(url => mutateBlockData('${slot.id}', data => data.items[${idx}].img = url))`;
             return `
               <div class="border border-slate-300 rounded p-2 flex flex-col items-center gap-2">
-                ${renderMiniImageBox(it.img, uploadCode, 'w-14 h-14')}
-                ${state.viewMode === 'edit' ? `<input type="text" value="${escapeAttr(it.answer || '')}" placeholder="Gabarito..." onchange="mutateBlockData('${slot.id}', data => data.items[${idx}].answer = this.value.toUpperCase(), true)" class="no-print w-full border rounded px-1 text-[10px] text-center font-bold uppercase">` : ''}
-                <div class="w-full h-6 border-b-2 border-slate-800 text-center font-bold text-xs text-blue-700">${isTeacher ? escapeHtml(it.answer || '') : ''}</div>
+                ${renderMiniImageBox(imgSrc, uploadCode, 'w-14 h-14')}
+                ${state.viewMode === 'edit' ? `<input type="text" value="${escapeAttr(it.answer || '')}" placeholder="Palavra (ex: BOLA)" onchange="updateWordAndAutoFetchMedia('${slot.id}', ${idx}, this.value, 'answer', 'img')" class="no-print w-full border border-blue-300 rounded px-1 text-[10px] text-center font-bold uppercase bg-blue-50/30">` : ''}
+                <div class="w-full h-6 border-b-2 border-slate-800 text-center font-bold text-xs text-blue-700">${isTeacher ? formatWithIntrasyllabicSupport(it.answer || '', useCV, useBox) : ''}</div>
               </div>
             `;
           }).join('');
@@ -2721,7 +3377,7 @@
           `;
         }
 
-        // 16. MATRIZ DE ALGORITMOS ARMADOS
+        // 22. MATRIZ DE ALGORITMOS ARMADOS
         case 'algoritmos': {
           const gridCols = d.cols === 4 ? 'grid-cols-4' : d.cols === 2 ? 'grid-cols-2' : 'grid-cols-3';
           const letters = ['a)', 'b)', 'c)', 'd)', 'e)', 'f)', 'g)', 'h)', 'i)', 'j)', 'k)', 'l)'];
@@ -2754,7 +3410,7 @@
           `;
         }
 
-        // 17 e 18. FRAÇÕES VISUAIS
+        // 23 e 24. FRAÇÕES VISUAIS
         case 'fracao_visual':
         case 'fracao_pintar': {
           const isPaintMode = b.type === 'fracao_pintar';
@@ -2790,7 +3446,7 @@
           `;
         }
 
-        // 19. FRAÇÕES EQUIVALENTES
+        // 25. FRAÇÕES EQUIVALENTES
         case 'fracao_equivalente': {
           const itemsHtml = d.items.map((it, idx) => {
             const box = (val, isMissing) => isMissing
@@ -2829,7 +3485,7 @@
           `;
         }
 
-        // 20. EXPRESSÕES E INCÓGNITAS
+        // 26. EXPRESSÕES E INCÓGNITAS
         case 'expressoes_incognita': {
           const itemsHtml = d.items.map((it, idx) => {
             let wsLines = '';
@@ -2854,7 +3510,7 @@
           `;
         }
 
-        // 21. POLÍGONOS REGULARES
+        // 27. POLÍGONOS REGULARES
         case 'poligonos_regulares': {
           const polyNames = { 3: 'Triângulo', 4: 'Quadrilátero', 5: 'Pentágono', 6: 'Hexágono', 7: 'Heptágono', 8: 'Octógono', 9: 'Eneágono', 10: 'Decágono' };
           const itemsHtml = d.polygons.map((sides) => {
@@ -2879,7 +3535,7 @@
           `;
         }
 
-        // 22. RETA NUMÉRICA (Agora suporta Múltiplas Retas dentro da mesma questão!)
+        // 28. RETA NUMÉRICA
         case 'reta_numerica': {
           const linesArr = d.lines || [{ start: d.start || 0, step: d.step || 5, count: d.count || 8, hiddenIndices: d.hiddenIndices || [2, 5] }];
           const linesHtml = linesArr.map((ln, lIdx) => {
@@ -2922,7 +3578,7 @@
           `;
         }
 
-        // 23. MATERIAL DOURADO
+        // 29. MATERIAL DOURADO
         case 'material_dourado': {
           const cardsHtml = d.numbers.map((num, idx) => {
             const c = Math.floor((num % 1000) / 100);
@@ -2946,7 +3602,7 @@
           `;
         }
 
-        // 24. ÁBACO DE PINOS
+        // 30. ÁBACO DE PINOS
         case 'abaco_pinos': {
           const cardsHtml = d.numbers.map((num, idx) => `
             <div class="border border-slate-300 rounded p-2 flex flex-col items-center">
@@ -2963,7 +3619,7 @@
           `;
         }
 
-        // 25. MALHA QUADRICULADA
+        // 31. MALHA QUADRICULADA
         case 'malha_quadriculada': {
           const cols = d.cols || 18, rows = d.rows || 6;
           const gridEl = d.gridType === 'dots'
@@ -2977,7 +3633,7 @@
           `;
         }
 
-        // 26. TABELA
+        // 32. TABELA
         case 'tabela': {
           const rowsHtml = d.cells.map((rowArr, rIdx) => {
             const isHeader = rIdx === 0 && d.shadedHeader;
@@ -2996,7 +3652,7 @@
           `;
         }
 
-        // 27. MAPA MENTAL
+        // 33. MAPA MENTAL
         case 'mapa_mental': {
           const branchesHtml = d.branches.map((br, idx) => `
             <div class="border-2 ${br.blank ? 'border-dashed border-slate-700' : 'border-slate-800 bg-slate-50'} rounded-lg p-2 flex items-center justify-between gap-1">
@@ -3017,11 +3673,11 @@
           `;
         }
 
-        // 28. LINHA DO TEMPO (Agora com suporte a Imagem opcional + Subtexto em cada Marco!)
+        // 34. LINHA DO TEMPO
         case 'linha_tempo': {
           const cols = d.events.length;
           const eventsHtml = d.events.map((ev, idx) => {
-            const uploadCode = `pickImageFor(url => mutateBlockData('${slot.id}', data => data.events[${idx}].img = url))`;
+            const uploadCode = `openMediaPicker(url => mutateBlockData('${slot.id}', data => data.events[${idx}].img = url))`;
             return `
               <div class="flex flex-col items-center text-center px-1">
                 <div contenteditable="true" data-placeholder="Data/Ano" oninput="mutateBlockData('${slot.id}', data => data.events[${idx}].date = this.innerText, true)" class="text-xs font-extrabold text-slate-900 mb-1">${escapeHtml(ev.date)}</div>
@@ -3042,26 +3698,26 @@
           `;
         }
 
-        // 29. IMAGEM OU QUADRO (Legenda some se ficar vazia!)
+        // 35. IMAGEM OU QUADRO DE DESENHO
         case 'imagem_quadro': {
           return `
             <div>
               ${renderQuestionHeaderInline(slot, qNum)}
               ${d.mode === 'image' && d.imageUrl ? `
                 <div class="flex flex-col items-center">
-                  <img src="${d.imageUrl}" style="max-height: ${(d.boxHeightCm || 4) * 37.8}px;" class="object-contain rounded ${d.photocopyFilter ? 'photocopy-filter' : ''}">
-                  <div contenteditable="true" data-placeholder="Fonte/Legenda (some na impressão se ficar vazio)" oninput="updateBlockProp('${slot.id}', 'caption', this.innerText, true)" class="text-[10px] italic text-slate-500 mt-0.5 hide-when-empty">${escapeHtml(d.caption || '')}</div>
+                  <img src="${d.imageUrl}" onclick="event.stopPropagation(); openMediaPicker(url => mutateBlockData('${slot.id}', data => { data.mode='image'; data.imageUrl=url; }))" style="max-height: ${(d.boxHeightCm || 4) * 37.8}px;" class="object-contain rounded cursor-pointer ${d.photocopyFilter ? 'photocopy-filter' : ''}">
+                  <div contenteditable="true" data-placeholder="Fonte/Legenda (some na impressão se vazio)" oninput="updateBlockProp('${slot.id}', 'caption', this.innerText, true)" class="text-[10px] italic text-slate-500 mt-0.5 hide-when-empty">${escapeHtml(d.caption || '')}</div>
                 </div>
               ` : `
-                <div onclick="pickImageFor(url => mutateBlockData('${slot.id}', data => { data.mode='image'; data.imageUrl=url; }))" style="height: ${d.boxHeightCm || 4}cm;" class="border-2 border-slate-700 rounded flex items-center justify-center text-slate-300 cursor-pointer">
-                  <span class="no-print text-[11px] text-slate-400">Quadro Livre (${d.boxHeightCm || 4}cm) — Clique para subir Imagem</span>
+                <div onclick="event.stopPropagation(); openMediaPicker(url => mutateBlockData('${slot.id}', data => { data.mode='image'; data.imageUrl=url; }))" style="height: ${d.boxHeightCm || 4}cm;" class="border-2 border-slate-700 rounded flex items-center justify-center text-slate-300 cursor-pointer">
+                  <span class="no-print text-[11px] text-slate-400">Quadro Livre (${d.boxHeightCm || 4}cm) — Clique para escolher do Banco .WebP ou subir Imagem</span>
                 </div>
               `}
             </div>
           `;
         }
 
-        // 30. TIRINHA / HQ
+        // 36. TIRINHA / HQ
         case 'tirinha_hq': {
           const count = d.framesCount || 3;
           let framesHtml = '';
@@ -3084,7 +3740,85 @@
     }
 
     /* ============================================================================
-       9. MOTORES AUXILIARES (CAÇA-PALAVRAS, MATEMÁTICA E IMAGENS)
+       10. SELETOR DE IMAGENS DO BANCO (.WEBP) + UPLOAD DO DISPOSITIVO
+       ============================================================================ */
+    function openMediaPicker(callbackFn) {
+      state.imageCallback = callbackFn;
+      const backdrop = document.getElementById('mediaPickerBackdrop');
+      const searchInp = document.getElementById('mediaPickerSearchInput');
+      if (searchInp) searchInp.value = '';
+      renderMediaPickerGrid('');
+      backdrop.classList.remove('hidden');
+      backdrop.classList.add('flex');
+      setTimeout(() => searchInp?.focus(), 60);
+    }
+
+    function closeMediaPicker() {
+      const backdrop = document.getElementById('mediaPickerBackdrop');
+      backdrop.classList.add('hidden');
+      backdrop.classList.remove('flex');
+    }
+
+    function renderMediaPickerGrid(query = '') {
+      const grid = document.getElementById('mediaPickerGrid');
+      if (!grid) return;
+      const cleanQ = toCleanSlug(query);
+      const allSlugs = getCatalogSlugs();
+      const filtered = cleanQ
+        ? allSlugs.filter(s => s.includes(cleanQ))
+        : allSlugs.slice(0, 40);
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `<div class="col-span-full py-8 text-center text-xs text-slate-400 font-semibold">Nenhuma figura encontrada para "${escapeHtml(query)}". Use o botão "Subir do PC/Tablet".</div>`;
+        return;
+      }
+
+      grid.innerHTML = filtered.map(slug => {
+        const src = `assets/img/palavras/${slug}.webp`;
+        return `
+          <div onclick="selectRepoWebpFromPicker('${src}')" class="bg-white border border-slate-200 hover:border-blue-600 hover:bg-blue-50/40 rounded-lg p-2 flex flex-col items-center justify-center gap-1 cursor-pointer transition">
+            <img src="${src}" alt="${slug}" class="w-12 h-12 object-contain" onerror="this.style.opacity='0.25'">
+            <span class="text-[10px] font-bold uppercase text-slate-700 truncate w-full text-center">${slug}</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function selectRepoWebpFromPicker(webpPath) {
+      if (state.imageCallback) {
+        state.imageCallback(webpPath);
+        state.imageCallback = null;
+      }
+      closeMediaPicker();
+    }
+
+    function clearCurrentPickedImage() {
+      if (state.imageCallback) {
+        state.imageCallback('');
+        state.imageCallback = null;
+      }
+      closeMediaPicker();
+    }
+
+    function triggerDeviceFileUpload() {
+      document.getElementById('hiddenImageInput').click();
+    }
+
+    function handleGlobalImageUpload(ev) {
+      const file = ev.target.files?.[0];
+      if (!file || !state.imageCallback) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        state.imageCallback(reader.result);
+        state.imageCallback = null;
+        ev.target.value = '';
+        closeMediaPicker();
+      };
+      reader.readAsDataURL(file);
+    }
+
+    /* ============================================================================
+       11. MOTORES MATEMÁTICOS VETORIAIS E AUXILIARES
        ============================================================================ */
     function updateWordSearchWords(slotId, rawCSV) {
       mutateBlockData(slotId, data => {
@@ -3221,24 +3955,6 @@
       return `<svg width="108" height="80" viewBox="0 0 108 80">${rods}<rect x="6" y="62" width="96" height="3.5" fill="#0f172a" rx="1"/></svg>`;
     }
 
-    /* Seletor universal de imagens por callback (funciona em qualquer sub-item!) */
-    function pickImageFor(callbackFn) {
-      state.imageCallback = callbackFn;
-      document.getElementById('hiddenImageInput').click();
-    }
-
-    function handleGlobalImageUpload(ev) {
-      const file = ev.target.files?.[0];
-      if (!file || !state.imageCallback) return;
-      const reader = new FileReader();
-      reader.onload = () => {
-        state.imageCallback(reader.result);
-        state.imageCallback = null;
-        ev.target.value = '';
-      };
-      reader.readAsDataURL(file);
-    }
-
     function setViewMode(mode) {
       state.viewMode = mode;
       document.body.classList.toggle('edit-mode', mode === 'edit');
@@ -3264,7 +3980,7 @@
     }
 
     /* ============================================================================
-       10. MODAIS DE SISTEMA (JSON E CONFIRMAÇÃO NATIVA) E PONTE KODULAR
+       12. MODAIS DE SISTEMA (JSON E CONFIRMAÇÃO NATIVA) E PONTE KODULAR
        ============================================================================ */
     function openJsonDialog(mode = 'import') {
       state.dialogAllowOutsideClose = true;
@@ -3389,6 +4105,11 @@
     };
 
     window.handleAndroidBack = function() {
+      const mediaModal = document.getElementById('mediaPickerBackdrop');
+      if (mediaModal && !mediaModal.classList.contains('hidden')) {
+        closeMediaPicker();
+        return;
+      }
       const backdrop = document.getElementById('systemDialogBackdrop');
       if (!backdrop.classList.contains('hidden')) {
         closeSystemDialog();
